@@ -6,14 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		563F045E2EECA135007ACD5F /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 563F045D2EECA135007ACD5F /* Shimmer */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
-		5601FE552ED645A40098BF53 /* todo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = todo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5601FE552ED645A40098BF53 /* flashcards.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = flashcards.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5601FE572ED645A40098BF53 /* todo */ = {
+		5601FE572ED645A40098BF53 /* flashcards */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = todo;
+			path = flashcards;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				563F045E2EECA135007ACD5F /* Shimmer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -32,7 +37,7 @@
 		5601FE4C2ED645A40098BF53 = {
 			isa = PBXGroup;
 			children = (
-				5601FE572ED645A40098BF53 /* todo */,
+				5601FE572ED645A40098BF53 /* flashcards */,
 				5601FE562ED645A40098BF53 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +45,7 @@
 		5601FE562ED645A40098BF53 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5601FE552ED645A40098BF53 /* todo.app */,
+				5601FE552ED645A40098BF53 /* flashcards.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +53,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5601FE542ED645A40098BF53 /* todo */ = {
+		5601FE542ED645A40098BF53 /* flashcards */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5601FE622ED645A50098BF53 /* Build configuration list for PBXNativeTarget "todo" */;
+			buildConfigurationList = 5601FE622ED645A50098BF53 /* Build configuration list for PBXNativeTarget "flashcards" */;
 			buildPhases = (
 				5601FE512ED645A40098BF53 /* Sources */,
 				5601FE522ED645A40098BF53 /* Frameworks */,
@@ -61,13 +66,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				5601FE572ED645A40098BF53 /* todo */,
+				5601FE572ED645A40098BF53 /* flashcards */,
 			);
-			name = todo;
+			name = flashcards;
 			packageProductDependencies = (
+				563F045D2EECA135007ACD5F /* Shimmer */,
 			);
 			productName = todo;
-			productReference = 5601FE552ED645A40098BF53 /* todo.app */;
+			productReference = 5601FE552ED645A40098BF53 /* flashcards.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +91,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5601FE502ED645A40098BF53 /* Build configuration list for PBXProject "todo" */;
+			buildConfigurationList = 5601FE502ED645A40098BF53 /* Build configuration list for PBXProject "flashcards" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -94,12 +100,15 @@
 			);
 			mainGroup = 5601FE4C2ED645A40098BF53;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				563F045C2EECA135007ACD5F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5601FE562ED645A40098BF53 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5601FE542ED645A40098BF53 /* todo */,
+				5601FE542ED645A40098BF53 /* flashcards */,
 			);
 		};
 /* End PBXProject section */
@@ -261,12 +270,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.todo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.Flashcards;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -293,12 +303,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.todo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.JackKroll.Flashcards;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -313,7 +324,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5601FE502ED645A40098BF53 /* Build configuration list for PBXProject "todo" */ = {
+		5601FE502ED645A40098BF53 /* Build configuration list for PBXProject "flashcards" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5601FE602ED645A50098BF53 /* Debug */,
@@ -322,7 +333,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5601FE622ED645A50098BF53 /* Build configuration list for PBXNativeTarget "todo" */ = {
+		5601FE622ED645A50098BF53 /* Build configuration list for PBXNativeTarget "flashcards" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5601FE632ED645A50098BF53 /* Debug */,
@@ -332,6 +343,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		563F045C2EECA135007ACD5F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		563F045D2EECA135007ACD5F /* Shimmer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 563F045C2EECA135007ACD5F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
+			productName = Shimmer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5601FE4D2ED645A40098BF53 /* Project object */;
 }

@@ -12,7 +12,7 @@ import SwiftData
 struct todoApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            StudySet.self, Card.self, SingleSide.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
