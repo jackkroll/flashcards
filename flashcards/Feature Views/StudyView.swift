@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StudyView: View {
     let studySet : StudySet
+    @EnvironmentObject var entitlement: EntitlementManager
     @State var visibleCards: [Card] = []
     @State private var undoStack: [Card] = []
     @State private var correctStack: [Card] = []
@@ -19,7 +20,15 @@ struct StudyView: View {
             GeometryReader { geo in
                 let size = geo.size
                 ZStack {
-                    if visibleCards.isEmpty {
+                    if studySet.cards.isEmpty {
+                        ContentUnavailableView {
+                            Label("No Cards to Study!", systemImage: "star.fill")
+                        } description: {
+                            Text("Great work! You completed a study set!")
+                            Text("\(correctStack.count) correct, \(incorrectStack.count) incorrect.")
+                        }
+                    }
+                    if visibleCards.isEmpty && studySet.cards.count > 0 {
                         ContentUnavailableView {
                             Label("Study Session Completed", systemImage: "star.fill")
                         } description: {
@@ -38,6 +47,47 @@ struct StudyView: View {
                         
                         CardView(card: card)
                             .padding()
+                            .overlay {
+                                // Green (right) / Red (left) edge gradients that grow with horizontal drag
+                                GeometryReader { proxy in
+                                    ZStack {
+                                        // Right swipe (green) overlay
+                                        LinearGradient(
+                                            gradient: Gradient(stops: [
+                                                .init(color: .clear, location: 0.0),
+                                                .init(color: Color.green.opacity(0.15), location: 0.35),
+                                                .init(color: Color.green.opacity(0.35), location: 0.7),
+                                                .init(color: Color.green.opacity(0.6), location: 1.0)
+                                            ]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                        .frame(width: proxy.size.width * min(max(dragOffset.width, 0) / (size.width * 0.25), 1))
+                                        .frame(maxHeight: .infinity)
+                                        .frame(maxWidth: .infinity, alignment: .trailing)
+                                        .opacity(isTop && dragOffset.width > 0 ? 1 : 0)
+                                        
+                                        // Left swipe (red) overlay
+                                        LinearGradient(
+                                            gradient: Gradient(stops: [
+                                                .init(color: Color.red.opacity(0.6), location: 0.0),
+                                                .init(color: Color.red.opacity(0.35), location: 0.3),
+                                                .init(color: Color.red.opacity(0.15), location: 0.65),
+                                                .init(color: .clear, location: 1.0)
+                                            ]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                        .frame(width: proxy.size.width * 0.6 * min(max(-dragOffset.width, 0) / (size.width * 0.25), 1))
+                                        .frame(maxHeight: .infinity)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .opacity(isTop && dragOffset.width < 0 ? 1 : 0)
+                                    }
+                                }
+                                .allowsHitTesting(false)
+                                .clipShape(RoundedRectangle(cornerRadius: 30))
+                                .padding()
+                            }
                             .scaleEffect(scale)
                             .offset(x: isTop ? dragOffset.width : 0,
                                     y: (isTop ? dragOffset.height : 0) + yOffset)
@@ -64,17 +114,20 @@ struct StudyView: View {
                                             withAnimation(.spring(response: 0.35, dampingFraction: 0.8, blendDuration: 0.2)) {
                                                 dragOffset = CGSize(width: direction * size.width * 1.5, height: translation.height)
                                             }
+                                            
+                                            let instanceHesitationTime = Date.now.distance(to: hesitationTimeStart)
                                             if direction > 0 {
                                                 //Swipe Right
-                                                card.stats?.addGottenCorrect(true)
+                                                card.stats.record(timeToFlip: instanceHesitationTime, gotCorrect: true)
                                                 correctStack.append(card)
                                             }
                                             else {
                                                 //Swipe Left
-                                                card.stats?.addGottenCorrect(false)
+                                                card.stats.record(timeToFlip: instanceHesitationTime, gotCorrect: false)
                                                 incorrectStack.append(card)
                                             }
-                                            card.stats?.addTimeToFlip(Date.now.distance(to: hesitationTimeStart))
+                                            
+                                            //card.stats?.addTimeToFlip(Date.now.distance(to: hesitationTimeStart))
                                             hesitationTimeStart = .now
                                             withAnimation {
                                                 if let removed = visibleCards.popLast() {
@@ -105,6 +158,19 @@ struct StudyView: View {
                     }
                     .disabled(undoStack.isEmpty)
                     Spacer()
+                    
+                }
+                ToolbarItem(placement: .topBarTrailing){
+                    if entitlement.hasPro {
+                        NavigationLink(destination: StatsView(viewingSet: studySet)){
+                            Image(systemName: "chart.bar.fill")
+                        }
+                    }
+                    else {
+                        NavigationLink(destination: StoreView()){
+                            Image(systemName: "chart.bar.fill")
+                        }
+                    }
                 }
                 
             }
@@ -141,5 +207,6 @@ extension StudyView {
     }()
 
     StudyView(studySet: set)
+        .environmentObject(EntitlementManager())
 }
 

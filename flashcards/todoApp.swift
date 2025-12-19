@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct todoApp: App {
+    @StateObject var entitlement = EntitlementManager()
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             StudySet.self, Card.self, SingleSide.self
@@ -26,7 +27,9 @@ struct todoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(entitlement)
         }
         .modelContainer(sharedModelContainer)
+        
     }
 }

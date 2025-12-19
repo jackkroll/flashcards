@@ -25,6 +25,12 @@ final class StudySet {
         self.created = .now
         self.stats = SetStats()
     }
+    init(title: String, description: String? = nil) {
+        self.title = title
+        self.setDescription = description
+        self.created = .now
+        self.stats = SetStats()
+    }
     func setTextualRepresentation() -> String {
         var representation = "Name: \(title)\nDescription: \(setDescription ?? "No description")\n"
         if cards.isEmpty {
@@ -40,36 +46,64 @@ final class StudySet {
     }
 }
 @Model
+final class SingleCardTesting {
+    var timeToFlip: TimeInterval
+    var gotCorrect: Bool
+    var timeCompleted: Date
+    init(timeToFlip: TimeInterval, gotCorrect: Bool) {
+        self.timeToFlip = timeToFlip
+        self.gotCorrect = gotCorrect
+        self.timeCompleted = .now
+    }
+}
+
+@Model
+final class CardFlag {
+    var id: UUID
+    var title: String
+    var color: Color.Resolved
+    
+    init(title: String, color: Color.Resolved) {
+        self.id = UUID()
+        self.title = title
+        self.color = color
+    }
+    
+    init(title: String, color: Color, environmentVals: EnvironmentValues) {
+        self.id = UUID()
+        self.title = title
+        self.color = color.resolve(in: environmentVals)
+    }
+}
+
+@Model
 final class CardStats {
-    var timeToFlip: [TimeInterval]
-    var gottenCorrect: [Bool]
+    var recordedStats: [SingleCardTesting] = []
+    var flags: [CardFlag] = []
     
     init() {
-        self.timeToFlip = []
-        self.gottenCorrect = []
+        recordedStats = []
+        flags = []
     }
     
-    func addGottenCorrect(_ correct: Bool) {
-        gottenCorrect.append(correct)
-        while gottenCorrect.count > 10 {
-            gottenCorrect.removeFirst()
-        }
+    func record(timeToFlip: TimeInterval, gotCorrect: Bool) {
+        recordedStats.append(.init(timeToFlip: timeToFlip, gotCorrect: gotCorrect))
     }
     
-    func addTimeToFlip(_ time: TimeInterval) {
-        timeToFlip.append(time)
-        while timeToFlip.count > 10 {
-            timeToFlip.removeFirst()
-        }
+    private func lastN(_ n: Int) -> [SingleCardTesting] {
+        return recordedStats.suffix(n)
     }
     
-    func rollingPercentCorrect() -> Double {
-        let correctCount = gottenCorrect.filter(\.self).count
-        return Double(correctCount) / Double(gottenCorrect.count)
+    func rollingPercentCorrect(recallWindow: Int = 10) -> Double {
+        let lastN = lastN(recallWindow)
+        let avg: Double = lastN.reduce(0) { $0 + ($1.gotCorrect ? 1 : 0) } / Double(lastN.count)
+        return avg
     }
     
-    func avgTimeToFlip() -> TimeInterval {
-        return timeToFlip.reduce(0, +) / TimeInterval(timeToFlip.count)
+    func avgTimeToFlip(recallWindow: Int = 10) -> TimeInterval {
+        let lastN = lastN(recallWindow)
+        let avg: Double = lastN.reduce(0) { $0 + $1.timeToFlip } / Double(lastN.count)
+        return avg
     }
 }
 
@@ -89,7 +123,7 @@ final class Card {
     @Relationship var setMembership : StudySet? = nil
     var front: SingleSide
     var back: SingleSide
-    var stats: CardStats? = nil
+    var stats: CardStats
     
     init(front: SingleSide, back: SingleSide) {
         self.front = front

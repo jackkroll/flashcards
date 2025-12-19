@@ -11,9 +11,11 @@ import FoundationModels
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var entitlement: EntitlementManager
     @Query private var sets: [StudySet]
     @State private var generateSetView: Bool = false
     @State private var searchText: String = ""
+    @State private var createSetView: Bool = false
     var model = SystemLanguageModel.default
     
     private var filteredSets: [StudySet] {
@@ -31,9 +33,11 @@ struct ContentView: View {
             VStack {
                 if sets.isEmpty {
                     ContentUnavailableView {
-                        Label("No Sets Created", systemImage: "square.stack.fill")
+                        Label("NO SETS CREATED".lowercased(), systemImage: "square.stack.fill")
+                            .fontDesign(.monospaced)
                     } description: {
-                        Text("Sets you create will appear here.")
+                        Text("sets you create will appear here")
+                            .fontDesign(.monospaced)
                     }
                 }
                 List {
@@ -62,15 +66,32 @@ struct ContentView: View {
                         }
                     }
                 }
-                .searchable(text: $searchText)
+                
             }
             .navigationDestination(for: StudySet.self) { set in
                 SetView(set: set)
             }
+            .searchable(text: $searchText)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Text("RECALL")
+                        .fontWeight(.semibold)
+                        .font(.title3)
+                        .fontDesign(.monospaced)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .foregroundStyle(.secondary)
+                }
+                .sharedBackgroundVisibility(.hidden)
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    Button {
+                        createSetView = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .sheet(isPresented: $createSetView) {
+                        SetSettingsView(studySet: nil)
+                            .presentationDetents([.medium, .large])
+                            //.interactiveDismissDisabled()
                     }
                 }
                 ToolbarItem {
@@ -87,14 +108,15 @@ struct ContentView: View {
                         
                     }
                 }
+                
+                DefaultToolbarItem(kind: .search, placement: .bottomBar)
+                ToolbarSpacer(.flexible, placement: .bottomBar)
+                ToolbarItem(placement: .bottomBar) {
+                        NavigationLink(destination: SettingsView()) {
+                            Image(systemName: "gear")
+                        }
+                }
             }
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = StudySet()
-            modelContext.insert(newItem)
         }
     }
 
