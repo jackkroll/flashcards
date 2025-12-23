@@ -49,7 +49,7 @@ struct GenerateSetView: View {
                     .fontWeight(.semibold)
                     .font(.title3)
                     .buttonSizing(.flexible)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                     .tint(.green)
                     Button("Regenerate") {
                         Task {
@@ -78,7 +78,7 @@ struct GenerateSetView: View {
                     .fontWeight(.semibold)
                     .font(.title3)
                     .buttonSizing(.flexible)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glass)
 
                 }
                 /*if isGenerating && set == nil {
@@ -130,7 +130,7 @@ struct GenerateSetView: View {
                     .fontWeight(.semibold)
                     .font(.title3)
                     .buttonSizing(.flexible)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                 }
             }
             .padding()

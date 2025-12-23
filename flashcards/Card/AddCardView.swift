@@ -113,7 +113,7 @@ struct AddCardView: View {
                     .disabled(!canAdd())
                     .fontWeight(.semibold)
                     .buttonSizing(.flexible)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glass)
                     .tint(parentCard != nil ? .blue : .green)
                     if parentCard == nil {
                         Button("Add Card + Continue Adding") {
@@ -132,7 +132,7 @@ struct AddCardView: View {
                         .disabled(!canAdd())
                         .fontWeight(.semibold)
                         .buttonSizing(.flexible)
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.glassProminent)
                     }
                 }
                 .padding()

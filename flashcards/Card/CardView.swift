@@ -11,6 +11,14 @@ import Shimmer
 struct CardView: View {
     @State private var currentSide = side.A
     @State var card: Card? = nil
+    @EnvironmentObject var entitlement: EntitlementManager
+    let minPercentCorrect: Double = 90
+    let maxTimeToFlip: TimeInterval? = nil
+    
+    let maxPercentCorrect: Double = 60
+    let minTimeToFlip: TimeInterval? = nil
+    
+    let recallWindow: Int = 10
     var body: some View {
         RoundedRectangle(cornerRadius: 50)
             .foregroundStyle(.background.secondary)
@@ -23,6 +31,7 @@ struct CardView: View {
                         CardContentView(side: card.back)
                             .opacity(currentSide == .B ? 1 :0)
                             .rotation3DEffect(.degrees(180), axis: (x: 0.0, y: -1.0, z: 0.0))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                     else {
                         VStack {
@@ -30,6 +39,7 @@ struct CardView: View {
                                 .redacted(reason: .placeholder)
                                 .shimmering()
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
                 .padding(.vertical, 30)
@@ -47,6 +57,26 @@ struct CardView: View {
                                 .fontDesign(.monospaced)
                                 .rotation3DEffect(.degrees(180), axis: (x: 0.0, y: currentSide == .A ? 0 : -1.0, z: 0.0))
                             Spacer()
+                            if let card = card {
+                                if entitlement.hasPro {
+                                    if card.determineIfStrong(minPercentCorrect: minPercentCorrect, maxTimeToFlip: maxTimeToFlip, recallWindow: recallWindow) {
+                                        Text("WEAK CARD")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .fontDesign(.monospaced)
+                                            .shimmering()
+                                            .brightness(2)
+                                    }
+                                    else if card.determineIfWeak(maxPercentCorrect: maxPercentCorrect, minTimeToFlip: minTimeToFlip, recallWindow: recallWindow) {
+                                        Text("STRONG CARD")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .fontDesign(.monospaced)
+                                            .shimmering()
+                                            .brightness(2)
+                                    }
+                                }
+                            }
                         }
                         .foregroundStyle(.tertiary)
                         .padding([.horizontal, .bottom], 30)
@@ -101,7 +131,9 @@ struct CardContentView : View {
 
 #Preview("Card Added"){
     CardView(card: Card(front: "Front Side", back: "Back Side"))
+        .environmentObject(EntitlementManager())
 }
 #Preview("No Card"){
     CardView(card: nil)
+        .environmentObject(EntitlementManager())
 }

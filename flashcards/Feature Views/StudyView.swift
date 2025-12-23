@@ -9,6 +9,11 @@ import SwiftUI
 
 struct StudyView: View {
     let studySet : StudySet
+    var shouldShuffle : Bool = false
+    var subsetSize : Int? = nil
+    var shouldFocusOnWeakCards : Bool = false
+    var includeStrongCards : Bool = true
+    
     @EnvironmentObject var entitlement: EntitlementManager
     @State var visibleCards: [Card] = []
     @State private var undoStack: [Card] = []
@@ -16,16 +21,19 @@ struct StudyView: View {
     @State private var incorrectStack: [Card] = []
     @State private var dragOffset: CGSize = .zero
     @State private var hesitationTimeStart: Date = .now
+    @State private var studyStartTime: Date? = nil
     var body: some View {
             GeometryReader { geo in
                 let size = geo.size
                 ZStack {
                     if studySet.cards.isEmpty {
-                        ContentUnavailableView {
-                            Label("No Cards to Study!", systemImage: "star.fill")
-                        } description: {
-                            Text("Great work! You completed a study set!")
-                            Text("\(correctStack.count) correct, \(incorrectStack.count) incorrect.")
+                        VStack {
+                            ContentUnavailableView {
+                                Label("No Cards to Study!", systemImage: "star.fill")
+                            } description: {
+                                Text("Great work! You completed a study set!")
+                                Text("\(correctStack.count) correct, \(incorrectStack.count) incorrect.")
+                            }
                         }
                     }
                     if visibleCards.isEmpty && studySet.cards.count > 0 {
@@ -36,7 +44,7 @@ struct StudyView: View {
                             Text("\(correctStack.count) correct, \(incorrectStack.count) incorrect.")
                         }
                     }
-                    ForEach(Array(visibleCards.enumerated()), id: \.element) { index, card in
+                    ForEach(visibleCards.enumerated(), id: \.element) { index, card in
                         let topIndex = visibleCards.count - 1
                         let isTop = index == topIndex
                         let depth = max(0, topIndex - index)
@@ -147,8 +155,23 @@ struct StudyView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .onAppear {
+                studyStartTime = .now
                 if visibleCards.isEmpty {
-                    visibleCards = Array(studySet.cards.reversed())
+                    var baseArr : [Card] = studySet.cards
+                    baseArr.reverse()
+                    if shouldShuffle {
+                        baseArr.shuffle()
+                    }
+                    if let stackSize = subsetSize {
+                        baseArr = Array(baseArr.prefix(stackSize))
+                    }
+                    visibleCards = baseArr
+                }
+            }
+            .onDisappear {
+                if let startTime = studyStartTime {
+                    studySet.stats.totalStudyTime += startTime.distance(to: .now)
+                    studyStartTime = nil
                 }
             }
             .toolbar {
@@ -160,7 +183,7 @@ struct StudyView: View {
                     Spacer()
                     
                 }
-                ToolbarItem(placement: .topBarTrailing){
+                ToolbarItem(placement: .bottomBar){
                     if entitlement.hasPro {
                         NavigationLink(destination: StatsView(viewingSet: studySet)){
                             Image(systemName: "chart.bar.fill")
@@ -200,13 +223,15 @@ extension StudyView {
 #Preview{
     let set: StudySet = {
         let s = StudySet()
-        for _ in 1...3 {
-            s.cards.append(Card(front: "Hello", back: "World"))
+        for num in 1...20 {
+            s.cards.append(Card(front: num.formatted(.number), back: "Back"))
         }
         return s
     }()
 
-    StudyView(studySet: set)
-        .environmentObject(EntitlementManager())
+    return NavigationStack {
+        StudyView(studySet: set)
+    }
+    .environmentObject(EntitlementManager())
 }
 

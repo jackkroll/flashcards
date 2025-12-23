@@ -74,14 +74,25 @@ struct ContentView: View {
             .searchable(text: $searchText)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text("RECALL")
-                        .fontWeight(.semibold)
-                        .font(.title3)
-                        .fontDesign(.monospaced)
-                        .fixedSize(horizontal: true, vertical: false)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 0){
+                        Text("RECALL")
+                            .fontWeight(.semibold)
+                            .font(.title3)
+                            .fontDesign(.monospaced)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .foregroundStyle(.secondary)
+                        if entitlement.hasPro {
+                            Text(":PRO")
+                                .fontWeight(.semibold)
+                                .font(.title3)
+                                .fontDesign(.monospaced)
+                                .fixedSize(horizontal: true, vertical: false)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
                 }
                 .sharedBackgroundVisibility(.hidden)
+                StreakToolbarItem(placement: .topBarLeading)
                 ToolbarItem {
                     Button {
                         createSetView = true
@@ -132,4 +143,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(for: StudySet.self, inMemory: true)
+        .environmentObject(EntitlementManager())
 }

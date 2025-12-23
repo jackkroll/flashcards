@@ -55,7 +55,7 @@ struct SetSettingsView: View {
                 .disabled(setTitle.isEmpty)
                 .padding()
                 .fontWeight(.semibold)
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
                 .buttonSizing(.flexible)
             }
             .toolbar {

@@ -19,6 +19,7 @@ struct SetView: View {
     @State var cardViewDislayed: Bool = false
     @State var settingsViewDisplayed: Bool = false
     @State var editCardSheet: Bool = false
+    @State private var showPlaySelectionSheet: Bool = false
     //@Namespace var namespace
     var body: some View {
             VStack {
@@ -118,7 +119,13 @@ struct SetView: View {
                                 .presentationDetents([.medium, .large])
                         }
                     Spacer()
-                    NavigationLink(destination: StudyView(studySet: set).environmentObject(entitlement)) {
+                    NavigationLink(destination: StatsView(viewingSet: set).environmentObject(entitlement)) {
+                        Image(systemName: "chart.bar.fill")
+                    }
+                    
+                    NavigationLink {
+                        PlaySelectionView(parentSet: set)
+                    } label: {
                         Image(systemName: "play.fill")
                     }
                     .disabled(set.cards.isEmpty)
@@ -133,8 +140,8 @@ struct SetView: View {
 #Preview {
     let set: StudySet = {
         let s = StudySet()
-        for _ in 1...20 {
-            s.cards.append(Card(front: "Hello", back: "World"))
+        for num in 1...20 {
+            s.cards.append(Card(front: "Hello \(num.formatted(.number))", back: "World"))
         }
         return s
     }()

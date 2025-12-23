@@ -22,18 +22,20 @@ final class EntitlementManager: ObservableObject {
         }
     }
     
-    func refreshEntitlements() async {
+    @MainActor
+    private func refreshEntitlements() async {
         hasPro = await hasActivePro()
     }
     
-    func listenForTransactions() async {
+    @MainActor
+    private func listenForTransactions() async {
         for await _ in Transaction.updates {
             await refreshEntitlements()
         }
     }
     
     @MainActor
-    func hasActivePro() async -> Bool {
+    private func hasActivePro() async -> Bool {
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
             

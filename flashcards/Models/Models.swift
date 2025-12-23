@@ -16,7 +16,7 @@ final class StudySet {
     var setDescription: String?
     var created: Date
     var lastStudied: Date? = nil
-    var stats: SetStats? = nil
+    var stats: SetStats = SetStats()
     @Relationship(inverse: \Card.setMembership) var cards: [Card] = []
     
     init() {
@@ -44,16 +44,40 @@ final class StudySet {
             return representation
         }
     }
+    
+    enum SortingPreference {
+        case speed, accuracy
+    }
+    
+    func strongCards(minPercentCorrect: Double?, maxTimeToFlip: TimeInterval?, recallWindow: Int = 10, sortingPreference : SortingPreference = .accuracy) -> [Card] {
+        let strong = cards.filter( {$0.determineIfStrong(minPercentCorrect: minPercentCorrect, maxTimeToFlip: maxTimeToFlip, recallWindow: recallWindow)} )
+        switch sortingPreference {
+        case .accuracy:
+            return strong.sorted(by: {$0.stats.rollingPercentCorrect(recallWindow: recallWindow) > $1.stats.rollingPercentCorrect(recallWindow: recallWindow)})
+        case .speed:
+            return strong.sorted(by: {$0.stats.avgTimeToFlip(recallWindow: recallWindow) > $1.stats.avgTimeToFlip(recallWindow: recallWindow)})
+        }
+    }
+    
+    func weakCards(maxPercentCorrect: Double?, minTimeToFlip: TimeInterval?, recallWindow: Int = 10, sortingPreference: SortingPreference = .accuracy) -> [Card] {
+        let weak = cards.filter( {$0.determineIfWeak(maxPercentCorrect: maxPercentCorrect, minTimeToFlip: minTimeToFlip, recallWindow: recallWindow)} )
+        switch sortingPreference {
+        case .accuracy:
+            return weak.sorted(by: {$0.stats.rollingPercentCorrect(recallWindow: recallWindow) < $1.stats.rollingPercentCorrect(recallWindow: recallWindow)})
+        case .speed:
+            return weak.sorted(by: {$0.stats.avgTimeToFlip(recallWindow: recallWindow) < $1.stats.avgTimeToFlip(recallWindow: recallWindow)})
+        }
+    }
 }
 @Model
 final class SingleCardTesting {
     var timeToFlip: TimeInterval
     var gotCorrect: Bool
     var timeCompleted: Date
-    init(timeToFlip: TimeInterval, gotCorrect: Bool) {
+    init(timeToFlip: TimeInterval, gotCorrect: Bool, timeCompleted: Date = .now) {
         self.timeToFlip = timeToFlip
         self.gotCorrect = gotCorrect
-        self.timeCompleted = .now
+        self.timeCompleted = timeCompleted
     }
 }
 
@@ -86,8 +110,8 @@ final class CardStats {
         flags = []
     }
     
-    func record(timeToFlip: TimeInterval, gotCorrect: Bool) {
-        recordedStats.append(.init(timeToFlip: timeToFlip, gotCorrect: gotCorrect))
+    func record(timeToFlip: TimeInterval, gotCorrect: Bool, timeCompleted: Date = .now) {
+        recordedStats.append(.init(timeToFlip: timeToFlip, gotCorrect: gotCorrect, timeCompleted: timeCompleted))
     }
     
     private func lastN(_ n: Int) -> [SingleCardTesting] {
@@ -135,6 +159,46 @@ final class Card {
         self.front = SingleSide(text: front)
         self.back = SingleSide(text: back)
         self.stats = CardStats()
+    }
+    
+    func determineIfStrong(minPercentCorrect: Double?, maxTimeToFlip: TimeInterval?, recallWindow: Int = 10) -> Bool {
+        let percentCorrect = self.stats.rollingPercentCorrect(recallWindow: recallWindow)
+        let timeToFlip = self.stats.avgTimeToFlip(recallWindow: recallWindow)
+        
+        // If the percent correct is less than the minimum threshold, invalidate
+        if let minPercentCorrect = minPercentCorrect {
+            if percentCorrect < minPercentCorrect {
+                return false
+            }
+        }
+        // If the time to flip is over the max allowed, invalidate
+        if let maxTimeToFlip = maxTimeToFlip {
+            if timeToFlip > maxTimeToFlip {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    func determineIfWeak(maxPercentCorrect: Double?, minTimeToFlip: TimeInterval?, recallWindow: Int = 10) -> Bool {
+        let percentCorrect = self.stats.rollingPercentCorrect(recallWindow: recallWindow)
+        let timeToFlip = self.stats.avgTimeToFlip(recallWindow: recallWindow)
+        
+        // If the percent correct is higher than the minimum needed, invalidate
+        if let maxPercentCorrect = maxPercentCorrect {
+            if percentCorrect > maxPercentCorrect {
+                return false
+            }
+        }
+        // If the time to flip is over the max allowed, invalidate
+        if let minTimeToFlip = minTimeToFlip {
+            if timeToFlip < minTimeToFlip {
+                return false
+            }
+        }
+        
+        return true
     }
 }
 

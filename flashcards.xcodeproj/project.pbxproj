@@ -8,10 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		563F045E2EECA135007ACD5F /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 563F045D2EECA135007ACD5F /* Shimmer */; };
+		5699B1BD2EF86A550082542D /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5699B1BC2EF86A550082542D /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5601FE552ED645A40098BF53 /* flashcards.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = flashcards.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5699B1BC2EF86A550082542D /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -28,6 +30,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				563F045E2EECA135007ACD5F /* Shimmer in Frameworks */,
+				5699B1BD2EF86A550082542D /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +41,7 @@
 			isa = PBXGroup;
 			children = (
 				5601FE572ED645A40098BF53 /* flashcards */,
+				5699B1BB2EF86A550082542D /* Frameworks */,
 				5601FE562ED645A40098BF53 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,6 +52,14 @@
 				5601FE552ED645A40098BF53 /* flashcards.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5699B1BB2EF86A550082542D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5699B1BC2EF86A550082542D /* StoreKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

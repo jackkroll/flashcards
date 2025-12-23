@@ -74,6 +74,13 @@ struct GenerableAddCardView : View {
                 TextField(text: $cardsPrompt) {
                     Text("Prompt for flashcards")
                 }
+                .onSubmit {
+                    if !cardsPrompt.isEmpty || isGenerating {
+                        Task {
+                            try? await generateCards()
+                        }
+                    }
+                }
                 .focused($promptFieldIsFocused)
                 .onAppear {
                     promptFieldIsFocused = true
@@ -82,35 +89,14 @@ struct GenerableAddCardView : View {
                 
                     Button("Generate") {
                         Task {
-                            withAnimation {
-                                isGenerating = true
-                            }
-                            let cardsPrompt = parentSet.setTextualRepresentation() + "User Request: \(cardsPrompt)" + "You should create entirely new cards, do NOT create any duplicates that were described above, only new cards. Please ensure that the content of the cards you generate strictly abide by the users prompt for each card generated."
-                            let stream = session.streamResponse(to: cardsPrompt, generating: [GenerableCard].self)
-                            for try await partial in stream {
-                                await MainActor.run {
-                                    withAnimation { self.cards = partial.content }
-                                }
-                            }
-                            let finishedCards = try? await stream.collect().content
-                            await MainActor.run {
-                                withAnimation {
-                                    // Update partials one last time if available
-                                    if let finished = finishedCards {
-                                        self.completedCards = finished.compactMap { gen in
-                                            gen.asCard()
-                                        }
-                                    }
-                                    self.isGenerating = false
-                                }
-                            }
+                            try? await generateCards()
                         }
                     }
                     .disabled(cardsPrompt.isEmpty || isGenerating)
                     .fontWeight(.semibold)
                     .font(.title3)
                     .buttonSizing(.flexible)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                 }
                 else {
                     Text("Generated content may contain errors, double check important information")
@@ -131,7 +117,7 @@ struct GenerableAddCardView : View {
                     .fontWeight(.semibold)
                     .font(.title3)
                     .buttonSizing(.flexible)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                     .tint(.green)
                     
                     Button("Regenerate") {
@@ -164,7 +150,7 @@ struct GenerableAddCardView : View {
                     .fontWeight(.semibold)
                     .font(.title3)
                     .buttonSizing(.flexible)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glass)
                 }
             }
             .padding()
@@ -173,6 +159,30 @@ struct GenerableAddCardView : View {
                     dismiss()
                 }
             }
+    }
+    func generateCards() async throws{
+        withAnimation {
+            isGenerating = true
+        }
+        let cardsPrompt = parentSet.setTextualRepresentation() + "User Request: \(cardsPrompt)" + "You should create entirely new cards, do NOT create any duplicates that were described above, only new cards. Please ensure that the content of the cards you generate strictly abide by the users prompt for each card generated."
+        let stream = session.streamResponse(to: cardsPrompt, generating: [GenerableCard].self)
+        for try await partial in stream {
+            await MainActor.run {
+                withAnimation { self.cards = partial.content }
+            }
+        }
+        let finishedCards = try? await stream.collect().content
+        await MainActor.run {
+            withAnimation {
+                // Update partials one last time if available
+                if let finished = finishedCards {
+                    self.completedCards = finished.compactMap { gen in
+                        gen.asCard()
+                    }
+                }
+                self.isGenerating = false
+            }
+        }
     }
     func cardsContainGenerableCard(genCard: GenerableCard?, cards: [Card]) -> Bool {
         /*if !parentSet.cards.contains(where: {
