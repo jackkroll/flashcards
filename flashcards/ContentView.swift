@@ -11,11 +11,14 @@ import FoundationModels
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var entitlement: EntitlementManager
+    @EnvironmentObject var router: Router
     @Query private var sets: [StudySet]
     @State private var generateSetView: Bool = false
     @State private var searchText: String = ""
     @State private var createSetView: Bool = false
+    
     var model = SystemLanguageModel.default
     
     private var filteredSets: [StudySet] {
@@ -29,20 +32,18 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $router.path){
             VStack {
                 if sets.isEmpty {
                     ContentUnavailableView {
-                        Label("NO SETS CREATED".lowercased(), systemImage: "square.stack.fill")
-                            .fontDesign(.monospaced)
+                        Label("No Sets Created", systemImage: "square.stack.fill")
                     } description: {
-                        Text("sets you create will appear here")
-                            .fontDesign(.monospaced)
+                        Text("Sets you create will appear here")
                     }
                 }
                 List {
                     ForEach(filteredSets) { item in
-                        NavigationLink(value: item) {
+                        NavigationLink(value: Route.set(setID: item.persistentModelID)) {
                             GroupBox(item.title) {
                                 if let description = item.setDescription {
                                     Text(description)
@@ -51,9 +52,13 @@ struct ContentView: View {
                                 HStack {
                                     Text("\(item.cards.count) cards")
                                     if let lastStudied = item.lastStudied {
-                                        Text(lastStudied, format: .dateTime)
+                                        Spacer()
+                                        Text("Studied: ")
+                                        Text(lastStudied.formatted(date: .abbreviated, time: .omitted))
                                     }
-                                    Spacer()
+                                    else {
+                                        Spacer()
+                                    }
                                 }
                             }
                         }
@@ -68,8 +73,8 @@ struct ContentView: View {
                 }
                 
             }
-            .navigationDestination(for: StudySet.self) { set in
-                SetView(set: set)
+            .navigationDestination(for: Route.self) { route in
+                RouterViewDestination(route: route)
             }
             .searchable(text: $searchText)
             .toolbar {
@@ -106,7 +111,7 @@ struct ContentView: View {
                     }
                 }
                 ToolbarItem {
-                    if model.isAvailable {
+                    if model.isAvailable && model.supportsLocale(){
                         Button {
                            generateSetView = true
                         } label: {
@@ -114,18 +119,24 @@ struct ContentView: View {
                                 .symbolRenderingMode(.multicolor)
                         }
                         .sheet(isPresented: $generateSetView) {
-                            GenerateSetView()
+                            NavigationStack {
+                                GenerateSetView()
+                            }
                         }
                         
                     }
                 }
                 
                 DefaultToolbarItem(kind: .search, placement: .bottomBar)
+                
                 ToolbarSpacer(.flexible, placement: .bottomBar)
+                
                 ToolbarItem(placement: .bottomBar) {
-                        NavigationLink(destination: SettingsView()) {
-                            Image(systemName: "gear")
-                        }
+                    Button {
+                        router.push(.settings)
+                    } label: {
+                        Image(systemName: "gear")
+                    }
                 }
             }
         }
@@ -144,4 +155,6 @@ struct ContentView: View {
     ContentView()
         .modelContainer(for: StudySet.self, inMemory: true)
         .environmentObject(EntitlementManager())
+        .environmentObject(Router())
 }
+

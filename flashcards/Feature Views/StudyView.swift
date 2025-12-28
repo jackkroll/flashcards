@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct StudyView: View {
     let studySet : StudySet
@@ -15,6 +16,9 @@ struct StudyView: View {
     var includeStrongCards : Bool = true
     
     @EnvironmentObject var entitlement: EntitlementManager
+    @EnvironmentObject var router: Router
+    @AppStorage("lastStudyDate") private var lastStudyDate: Date = .distantPast
+    @AppStorage("currentStreak") private var currentStreak: Int = 0
     @State var visibleCards: [Card] = []
     @State private var undoStack: [Card] = []
     @State private var correctStack: [Card] = []
@@ -123,7 +127,7 @@ struct StudyView: View {
                                                 dragOffset = CGSize(width: direction * size.width * 1.5, height: translation.height)
                                             }
                                             
-                                            let instanceHesitationTime = Date.now.distance(to: hesitationTimeStart)
+                                            let instanceHesitationTime = abs(Date.now.distance(to: hesitationTimeStart))
                                             if direction > 0 {
                                                 //Swipe Right
                                                 card.stats.record(timeToFlip: instanceHesitationTime, gotCorrect: true)
@@ -155,6 +159,18 @@ struct StudyView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .onAppear {
+                // Streak updating
+                let calendar = Calendar.current
+                if calendar.isDateInYesterday(lastStudyDate) {
+                    currentStreak += 1
+                } else {
+                    // missed one or more days (or first time): start a new streak
+                    currentStreak = 1
+                }
+                lastStudyDate = .now
+                
+                studySet.lastStudied = .now
+                
                 studyStartTime = .now
                 if visibleCards.isEmpty {
                     var baseArr : [Card] = studySet.cards
@@ -185,13 +201,17 @@ struct StudyView: View {
                 }
                 ToolbarItem(placement: .bottomBar){
                     if entitlement.hasPro {
-                        NavigationLink(destination: StatsView(viewingSet: studySet)){
+                        Button {
+                            router.push(.stats(setID: studySet.persistentModelID))
+                        } label: {
                             Image(systemName: "chart.bar.fill")
                         }
                     }
                     else {
-                        NavigationLink(destination: StoreView()){
-                            Image(systemName: "chart.bar.fill")
+                        Button {
+                            router.push(.proCompare)
+                        } label: {
+                            Image(systemName: "chart.bar")
                         }
                     }
                 }
@@ -229,9 +249,11 @@ extension StudyView {
         return s
     }()
 
+
     return NavigationStack {
         StudyView(studySet: set)
     }
     .environmentObject(EntitlementManager())
+    .environmentObject(Router())
 }
 

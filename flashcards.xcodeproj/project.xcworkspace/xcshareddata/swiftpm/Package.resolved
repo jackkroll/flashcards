@@ -1,6 +1,15 @@
 {
-  "originHash" : "400e80efd90c05d50f94767717f9679a180a664ace23ebc82547b1a892b1bee8",
+  "originHash" : "b72ffb8f1dce4db5da41ab52609711a40712004a497fbe8da4f7e5a06002fd7d",
   "pins" : [
+    {
+      "identity" : "swiftui-onboarding",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Sedlacek-Solutions/SwiftUI-Onboarding.git",
+      "state" : {
+        "revision" : "abc75fa48204dc281387579580d83e5a669efa02",
+        "version" : "2.2.1"
+      }
+    },
     {
       "identity" : "swiftui-shimmer",
       "kind" : "remoteSourceControl",

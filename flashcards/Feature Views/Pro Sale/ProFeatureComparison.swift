@@ -129,6 +129,9 @@ private struct IndividualRowAvailable: View {
 
 // MARK: - Main View
 struct ProFeatureComparison: View {
+    @EnvironmentObject var entitlement: EntitlementManager
+    @EnvironmentObject var router: Router
+    @Environment(\.dismiss) var dismiss
     private let columnWidth: CGFloat = 64
 
     var body: some View {
@@ -187,8 +190,8 @@ struct ProFeatureComparison: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
 
-                    Button {
-                        
+                    Button{
+                        router.push(.storeView)
                     } label: {
                             Image(systemName: "sparkles")
                             Text("Upgrade to Pro")
@@ -201,7 +204,11 @@ struct ProFeatureComparison: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("Compare Free vs Pro")
+        .onAppear {
+            if entitlement.hasPro {
+                dismiss()
+            }
+        }
     }
 }
 
@@ -209,4 +216,6 @@ struct ProFeatureComparison: View {
     NavigationStack {
         ProFeatureComparison()
     }
+    .environmentObject(EntitlementManager())
+    .environmentObject(Router())
 }

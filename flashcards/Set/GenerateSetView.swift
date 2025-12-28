@@ -18,9 +18,20 @@ struct GenerateSetView: View {
     @State var setPrompt: String = ""
     @State var set : GenerableSet.PartiallyGenerated? = nil
     @State var completedSet : StudySet? = nil
+    @State private var errorMessage: String? = nil
     var body: some View {
-        NavigationStack {
             VStack {
+                if let msg =  errorMessage {
+                    HStack {
+                        Text(msg)
+                            .bold()
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .glassEffect()
+                    .animation(.easeInOut, value: errorMessage)
+                    
+                }
                 if set != nil {
                     GroupBox(set!.title ?? "Untitled") {
                         if set!.description != nil && !set!.description!.isEmpty {
@@ -53,24 +64,45 @@ struct GenerateSetView: View {
                     .tint(.green)
                     Button("Regenerate") {
                         Task {
+                            errorMessage = nil
                             withAnimation {
                                 completedSet = nil
                                 isGenerating = true
                             }
-                            let stream = session.streamResponse(to: "The user rejected the previous set, create a different one", generating: GenerableSet.self)
-                            for try await partial in stream {
+                            do {
+                                let stream = session.streamResponse(to: "The user rejected the previous set, create a different one", generating: GenerableSet.self)
+                                for try await partial in stream {
+                                    await MainActor.run {
+                                        withAnimation { self.set = partial.content }
+                                    }
+                                }
+                                // then collect final if supported, on main actor
+                                let finishedSet = try? await stream.collect().content
                                 await MainActor.run {
-                                    withAnimation { self.set = partial.content }
+                                    withAnimation {
+                                        self.set = finishedSet?.asPartiallyGenerated()
+                                        self.completedSet = finishedSet?.exportToStudySet()
+                                        self.isGenerating = false
+                                    }
                                 }
                             }
-                            // then collect final if supported, on main actor
-                            let finishedSet = try? await stream.collect().content
-                            await MainActor.run {
-                                withAnimation {
-                                    self.set = finishedSet?.asPartiallyGenerated()
-                                    self.completedSet = finishedSet?.exportToStudySet()
-                                    self.isGenerating = false
-                                }
+                            catch LanguageModelSession.GenerationError.unsupportedLanguageOrLocale {
+                                errorMessage = "Unsupported Locale or Language"
+                            }
+                            catch LanguageModelSession.GenerationError.exceededContextWindowSize {
+                                errorMessage = "Context Window Exceeded"
+                            }
+                            catch LanguageModelSession.GenerationError.refusal {
+                                errorMessage = "Generation Refused by Model"
+                            }
+                            catch LanguageModelSession.GenerationError.guardrailViolation {
+                                errorMessage = "Model Indicated Guardrail Violation"
+                            }
+                            catch {
+                                errorMessage = error.localizedDescription
+                            }
+                            if errorMessage != nil {
+                                self.isGenerating = false
                             }
                         }
                     }
@@ -105,24 +137,44 @@ struct GenerateSetView: View {
                     
                     Button("Generate") {
                         Task {
+                            errorMessage = nil
                             withAnimation {
                                 isGenerating = true
                             }
-                            
-                            let stream = session.streamResponse(to: setPrompt, generating: GenerableSet.self)
-                            for try await partial in stream {
+                            do {
+                                let stream = session.streamResponse(to: setPrompt, generating: GenerableSet.self)
+                                for try await partial in stream {
+                                    await MainActor.run {
+                                        withAnimation { self.set = partial.content }
+                                    }
+                                }
+                                
+                                let finishedSet = try? await stream.collect().content
                                 await MainActor.run {
-                                    withAnimation { self.set = partial.content }
+                                    withAnimation {
+                                        self.set = finishedSet?.asPartiallyGenerated()
+                                        self.completedSet = finishedSet?.exportToStudySet()
+                                        self.isGenerating = false
+                                    }
                                 }
                             }
-                            // then collect final if supported, on main actor
-                            let finishedSet = try? await stream.collect().content
-                            await MainActor.run {
-                                withAnimation {
-                                    self.set = finishedSet?.asPartiallyGenerated()
-                                    self.completedSet = finishedSet?.exportToStudySet()
-                                    self.isGenerating = false
-                                }
+                            catch LanguageModelSession.GenerationError.unsupportedLanguageOrLocale {
+                                errorMessage = "Unsupported Locale or Language"
+                            }
+                            catch LanguageModelSession.GenerationError.exceededContextWindowSize {
+                                errorMessage = "Context Window Exceeded"
+                            }
+                            catch LanguageModelSession.GenerationError.refusal {
+                                errorMessage = "Generation Refused by Model"
+                            }
+                            catch LanguageModelSession.GenerationError.guardrailViolation {
+                                errorMessage = "Model Indicated Guardrail Violation"
+                            }
+                            catch {
+                                errorMessage = error.localizedDescription
+                            }
+                            if errorMessage != nil {
+                                self.isGenerating = false
                             }
                         }
                     }
@@ -141,14 +193,13 @@ struct GenerateSetView: View {
                     }
                 }
             }
-        }
-    }
-    func generateSet() async {
-        
+             
     }
 }
 
 #Preview {
-    GenerateSetView()
+    NavigationStack {
+        GenerateSetView()
+    }
     
 }

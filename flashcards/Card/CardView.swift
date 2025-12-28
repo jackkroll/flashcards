@@ -9,16 +9,22 @@ import SwiftUI
 import Shimmer
 
 struct CardView: View {
+    @EnvironmentObject var entitlement: EntitlementManager
+    @AppStorage("strongMinPercentCorrectEnabled") private var strongMinPercentCorrectEnabled: Bool = true
+    @AppStorage("strongMinPercentCorrect") private var strongMinPercentCorrect: Double = 0.8
+    @AppStorage("strongMaxTimeToFlipEnabled") private var strongMaxTimeToFlipEnabled: Bool = false
+    @AppStorage("strongMaxTimeToFlipSeconds") private var strongMaxTimeToFlipSeconds: Double = 5
+    @AppStorage("strongRecallWindow") private var strongRecallWindow: Int = 10
+
+    @AppStorage("weakMaxPercentCorrectEnabled") private var weakMaxPercentCorrectEnabled: Bool = true
+    @AppStorage("weakMaxPercentCorrect") private var weakMaxPercentCorrect: Double = 0.4
+    @AppStorage("weakMinTimeToFlipEnabled") private var weakMinTimeToFlipEnabled: Bool = false
+    @AppStorage("weakMinTimeToFlipSeconds") private var weakMinTimeToFlipSeconds: Double = 7
+    @AppStorage("weakRecallWindow") private var weakRecallWindow: Int = 10
+    
     @State private var currentSide = side.A
     @State var card: Card? = nil
-    @EnvironmentObject var entitlement: EntitlementManager
-    let minPercentCorrect: Double = 90
-    let maxTimeToFlip: TimeInterval? = nil
     
-    let maxPercentCorrect: Double = 60
-    let minTimeToFlip: TimeInterval? = nil
-    
-    let recallWindow: Int = 10
     var body: some View {
         RoundedRectangle(cornerRadius: 50)
             .foregroundStyle(.background.secondary)
@@ -59,21 +65,29 @@ struct CardView: View {
                             Spacer()
                             if let card = card {
                                 if entitlement.hasPro {
-                                    if card.determineIfStrong(minPercentCorrect: minPercentCorrect, maxTimeToFlip: maxTimeToFlip, recallWindow: recallWindow) {
-                                        Text("WEAK CARD")
-                                            .font(.caption)
-                                            .fontWeight(.bold)
-                                            .fontDesign(.monospaced)
-                                            .shimmering()
-                                            .brightness(2)
-                                    }
-                                    else if card.determineIfWeak(maxPercentCorrect: maxPercentCorrect, minTimeToFlip: minTimeToFlip, recallWindow: recallWindow) {
+                                    if card.determineIfStrong(
+                                        minPercentCorrect: strongMinPercentCorrectEnabled ? strongMinPercentCorrect : nil,
+                                        maxTimeToFlip: strongMaxTimeToFlipEnabled ? strongMaxTimeToFlipSeconds : nil,
+                                        recallWindow: strongRecallWindow) {
                                         Text("STRONG CARD")
                                             .font(.caption)
                                             .fontWeight(.bold)
                                             .fontDesign(.monospaced)
                                             .shimmering()
                                             .brightness(2)
+                                            .rotation3DEffect(.degrees(180), axis: (x: 0.0, y: currentSide == .A ? 0 : -1.0, z: 0.0))
+                                    }
+                                    else if card.determineIfWeak(
+                                        maxPercentCorrect: weakMaxPercentCorrectEnabled ? weakMaxPercentCorrect : nil,
+                                        minTimeToFlip: weakMinTimeToFlipEnabled ? weakMinTimeToFlipSeconds : nil,
+                                        recallWindow: weakRecallWindow) {
+                                        Text("WEAK CARD")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .fontDesign(.monospaced)
+                                            .shimmering()
+                                            .brightness(2)
+                                            .rotation3DEffect(.degrees(180), axis: (x: 0.0, y: currentSide == .A ? 0 : -1.0, z: 0.0))
                                     }
                                 }
                             }

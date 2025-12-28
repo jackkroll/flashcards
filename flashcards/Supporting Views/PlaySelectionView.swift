@@ -6,11 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct PlaySelectionView: View {
     @EnvironmentObject var entitlement: EntitlementManager
-    @AppStorage("lastStudyDate") private var lastStudyDate: Date = .distantPast
-    @AppStorage("currentStreak") private var currentSteak: Int = 0
+    @EnvironmentObject var router: Router
     let parentSet: StudySet
     @State var shuffle: Bool = true
     @State var focusOnWeakCards: Bool = false
@@ -81,27 +81,13 @@ struct PlaySelectionView: View {
             }
             .disabled(!entitlement.hasPro)
             Spacer()
-            NavigationLink {
-                /*
-                 var shouldShuffle : Bool = true
-                 var subsetSize : Int? = nil
-                 var shouldFocusOnWeakCards : Bool = false
-                 var includeStrongCards : Bool = true
-                 */
-                StudyView(
-                    studySet: parentSet,
-                    shouldShuffle: shuffle,
-                    subsetSize: lightningReview ? Int(numToReview) : nil,
-                    shouldFocusOnWeakCards: focusOnWeakCards,
-                    includeStrongCards: includeStrongCards
+            Button {
+                router.push(.study(studySet: parentSet.persistentModelID,
+                                   shuffle: shuffle,
+                                   subsetSize: lightningReview ? Int(numToReview) : nil,
+                                   focusOnWeakCards: focusOnWeakCards,
+                                   includeStrongCards: includeStrongCards)
                 )
-                .onAppear {
-                    if lastStudyDate.distance(to: .now) > 1.toDays {
-                        lastStudyDate = .now
-                        currentSteak += 1
-                    }
-                    parentSet.lastStudied = .now
-                }
             } label: {
                 Image(systemName: "play.fill")
                 Text("Start review")
@@ -142,8 +128,11 @@ struct PlaySelectionView: View {
     for _ in 0...20 {
         set.cards.append(Card(front: "Hello", back: "World"))
     }
+    
     return NavigationStack {
         PlaySelectionView(parentSet: set)
     }
     .environmentObject(EntitlementManager())
+    .environmentObject(Router())
 }
+

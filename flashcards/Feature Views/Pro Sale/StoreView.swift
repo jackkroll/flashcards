@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 import StoreKit
 import Shimmer
 
 struct StoreView: View {
-    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var entitlement: EntitlementManager
+    @EnvironmentObject var router: Router
     var body: some View {
             SubscriptionStoreView(groupID: "21863675") {
                 VStack {
@@ -45,9 +47,19 @@ struct StoreView: View {
             }
             .backgroundStyle(.thinMaterial)
             .navigationBarBackButtonHidden()
+            .onChange(of: entitlement.hasPro) { old, new in
+                if new {
+                    let id = router.popToLast(case: .set)
+                    if let id = id {
+                        router.push(.stats(setID: id))
+                    }
+                }
+
+            }
         }
 }
 
 #Preview {
     StoreView()
+        .environmentObject(EntitlementManager())
 }

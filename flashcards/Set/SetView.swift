@@ -12,7 +12,9 @@ import PhotosUI
 
 struct SetView: View {
     @EnvironmentObject var entitlement : EntitlementManager
+    @EnvironmentObject var router: Router
     @Environment(\.modelContext) var modelContext
+    @Environment(\.dismiss) var dismiss
     @Bindable var set: StudySet
     @State var isAddCardSheetDisplayed: Bool = false
     @State var genCardSheetDisplayed: Bool = false
@@ -53,7 +55,10 @@ struct SetView: View {
                                             Label("Delete", systemImage: "trash")
                                         }
                                         
-                                        NavigationLink(destination: AddCardView(parentSet: set, parentCard: card)) {
+                                        Button {
+                                            router.push(.addCard(setID: set.persistentModelID,
+                                                                 cardID: card.persistentModelID))
+                                        } label: {
                                             Label("Edit", systemImage: "pencil")
                                                 .tint(.blue)
                                         }
@@ -74,12 +79,16 @@ struct SetView: View {
                 }
             }
             .sheet(isPresented: $isAddCardSheetDisplayed) {
-                AddCardView(parentSet: set)
-                    //.interactiveDismissDisabled()
+                NavigationStack {
+                    AddCardView(parentSet: set)
+                }
+                .interactiveDismissDisabled()
             }
             .sheet(isPresented: $genCardSheetDisplayed) {
-                GenerableAddCardView(parentSet: set)
-                    //.interactiveDismissDisabled()
+                NavigationStack {
+                    GenerableAddCardView(parentSet: set)
+                }
+                .interactiveDismissDisabled()
             }
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -89,11 +98,13 @@ struct SetView: View {
                         Image(systemName: "plus")
                     }
                     
-                    Button {
-                        genCardSheetDisplayed = true
-                    } label : {
-                        Image(systemName: "apple.intelligence")
-                            .symbolRenderingMode(.multicolor)
+                    if SystemLanguageModel.default.isAvailable && SystemLanguageModel.default.supportsLocale() {
+                        Button {
+                            genCardSheetDisplayed = true
+                        } label : {
+                            Image(systemName: "apple.intelligence")
+                                .symbolRenderingMode(.multicolor)
+                        }
                     }
                 }
                 ToolbarItemGroup(placement: .bottomBar) {
@@ -119,12 +130,23 @@ struct SetView: View {
                                 .presentationDetents([.medium, .large])
                         }
                     Spacer()
-                    NavigationLink(destination: StatsView(viewingSet: set).environmentObject(entitlement)) {
-                        Image(systemName: "chart.bar.fill")
+                    if entitlement.hasPro {
+                        Button {
+                            router.push(.stats(setID: set.persistentModelID))
+                        } label: {
+                            Image(systemName: "chart.bar.fill")
+                        }
+                    }
+                    else {
+                        Button {
+                            router.push(.proCompare)
+                        } label: {
+                            Image(systemName: "chart.bar")
+                        }
                     }
                     
-                    NavigationLink {
-                        PlaySelectionView(parentSet: set)
+                    Button {
+                        router.push(.playSelectionView(setID: set.persistentModelID))
                     } label: {
                         Image(systemName: "play.fill")
                     }
@@ -149,4 +171,6 @@ struct SetView: View {
         SetView(set: set)
     }
     .environmentObject(EntitlementManager())
+    .environmentObject(Router())
 }
+

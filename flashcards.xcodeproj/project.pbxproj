@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5623AC5F2EFC6564001933BE /* Onboarding in Frameworks */ = {isa = PBXBuildFile; productRef = 5623AC5E2EFC6564001933BE /* Onboarding */; };
 		563F045E2EECA135007ACD5F /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 563F045D2EECA135007ACD5F /* Shimmer */; };
 		5699B1BD2EF86A550082542D /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5699B1BC2EF86A550082542D /* StoreKit.framework */; };
 /* End PBXBuildFile section */
@@ -16,9 +17,33 @@
 		5699B1BC2EF86A550082542D /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5623AC622EFC6586001933BE /* Exceptions for "flashcards" folder in "flashcards" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Supporting Views/WelcomeScreen.swift",
+			);
+			target = 5601FE542ED645A40098BF53 /* flashcards */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		5623AC632EFC6586001933BE /* Exceptions for "flashcards" folder in "Copy Bundle Resources" phase from "flashcards" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 5601FE532ED645A40098BF53 /* Resources */;
+			membershipExceptions = (
+				"Supporting Views/WelcomeScreen.swift",
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5601FE572ED645A40098BF53 /* flashcards */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5623AC622EFC6586001933BE /* Exceptions for "flashcards" folder in "flashcards" target */,
+				5623AC632EFC6586001933BE /* Exceptions for "flashcards" folder in "Copy Bundle Resources" phase from "flashcards" target */,
+			);
 			path = flashcards;
 			sourceTree = "<group>";
 		};
@@ -31,6 +56,7 @@
 			files = (
 				563F045E2EECA135007ACD5F /* Shimmer in Frameworks */,
 				5699B1BD2EF86A550082542D /* StoreKit.framework in Frameworks */,
+				5623AC5F2EFC6564001933BE /* Onboarding in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +109,7 @@
 			name = flashcards;
 			packageProductDependencies = (
 				563F045D2EECA135007ACD5F /* Shimmer */,
+				5623AC5E2EFC6564001933BE /* Onboarding */,
 			);
 			productName = todo;
 			productReference = 5601FE552ED645A40098BF53 /* flashcards.app */;
@@ -114,6 +141,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				563F045C2EECA135007ACD5F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+				5623AC5D2EFC6564001933BE /* XCRemoteSwiftPackageReference "SwiftUI-Onboarding" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5601FE562ED645A40098BF53 /* Products */;
@@ -359,6 +387,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		5623AC5D2EFC6564001933BE /* XCRemoteSwiftPackageReference "SwiftUI-Onboarding" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Sedlacek-Solutions/SwiftUI-Onboarding.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.1;
+			};
+		};
 		563F045C2EECA135007ACD5F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer.git";
@@ -370,6 +406,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5623AC5E2EFC6564001933BE /* Onboarding */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5623AC5D2EFC6564001933BE /* XCRemoteSwiftPackageReference "SwiftUI-Onboarding" */;
+			productName = Onboarding;
+		};
 		563F045D2EECA135007ACD5F /* Shimmer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 563F045C2EECA135007ACD5F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;

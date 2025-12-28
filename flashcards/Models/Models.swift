@@ -69,6 +69,7 @@ final class StudySet {
         }
     }
 }
+
 @Model
 final class SingleCardTesting {
     var timeToFlip: TimeInterval
@@ -242,7 +243,7 @@ final class SingleSide {
 struct GenerableSet {
     var title: String
     var description: String?
-    @Guide(description: "The flashcards of the set, following the provided theme", .minimumCount(5))
+    @Guide(description: "The flashcards of the set, strictly following the provided theme", .count(5...10))
     var cards: [GenerableCard]
     
     func exportToStudySet() -> StudySet {
@@ -265,6 +266,16 @@ struct GenerableCard {
     
     func asCard() -> Card {
         return Card(front: front, back: back)
+    }
+}
+
+@Generable
+struct GenerableStudySetExpansion {
+    @Guide(description: "New cards to expand an existing set. The new cards must not be same as old cards. You MUST strictly adhere to the user prompt when creating these cards", .count(5...10))
+    var cards: [GenerableCard]
+    
+    func toCards() -> [Card] {
+        return cards.map { $0.asCard() }
     }
 }
 

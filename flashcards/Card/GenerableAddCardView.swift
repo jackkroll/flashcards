@@ -15,12 +15,49 @@ struct GenerableAddCardView : View {
     @State var isGenerating = false
     @State var cardsPrompt: String = ""
     let session = LanguageModelSession(model: .default)
-    @State var cards : [GenerableCard.PartiallyGenerated] = []
+    @State var expansion : GenerableStudySetExpansion.PartiallyGenerated? = nil
     @State var completedCards : [Card] = []
     let parentSet: StudySet
+    @State private var errorMessage: String? = nil
     var body: some View {
+        if !SystemLanguageModel.default.isAvailable {
+            ContentUnavailableView {
+                Label("Apple Intelligence Not Available", systemImage: "apple.intelligence.badge.xmark")
+            } description: {
+                switch SystemLanguageModel.default.availability {
+                case .unavailable(.appleIntelligenceNotEnabled):
+                    Text("The model is not enabled on your device")
+                case .unavailable(.deviceNotEligible):
+                    Text("Your device is not eligible for this model")
+                case .unavailable(.modelNotReady):
+                    Text("The device model is not ready yet, check back later")
+                default:
+                    Text("Unknown availability")
+                }
+
+            }
+        }
+        else if !SystemLanguageModel.default.supportsLocale() {
+            ContentUnavailableView {
+                Label("Apple Intelligence Not Available", systemImage: "apple.intelligence.badge.xmark")
+            } description: {
+                Text("This model does not currently support this device's locale")
+            }
+        }
+        else {
             VStack {
-                if cards.isEmpty {
+                    if let msg =  errorMessage {
+                        HStack {
+                            Text(msg)
+                                .bold()
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .glassEffect()
+                        .animation(.easeInOut, value: errorMessage)
+                        
+                    }
+                if expansion == nil {
                     ContentUnavailableView {
                         Label("Create some Cards", systemImage: "sparkles")
                     } description: {
@@ -28,68 +65,68 @@ struct GenerableAddCardView : View {
                     }
                 }
                 ScrollView {
-                    ForEach(cards, id: \.id) { card in
-                           HStack {
-                               GenerableCardView(card: card)
-                               if completedCards.contains(where: {
-                                   $0.front.text == (card.front ?? "") &&
-                                   $0.back.text == (card.back ?? "")})
-                               {
-                                   Button {
-                                       if parentSet.cards.contains(where: {
-                                           $0.front.text == (card.front ?? "") &&
-                                           $0.back.text == (card.back ?? "")}) {
-                                           withAnimation {
-                                               parentSet.cards.removeAll(where: {
-                                                   $0.front.text == (card.front ?? "") &&
-                                                   $0.back.text == (card.back ?? "")})
-                                               try? modelContext.save()
-                                           }
-                                       }
-                                       else {
-                                           withAnimation {
-                                               parentSet.cards.append(Card(front: card.front ?? "", back: card.back ?? ""))
-                                               try? modelContext.save()
-                                           }
-                                       }
-                                   } label : {
-                                       Image(systemName: parentSet.cards.contains(where: {
-                                           $0.front.text == (card.front ?? "") &&
-                                           $0.back.text == (card.back ?? "")}) ?
-                                            "checkmark" : "plus")
-                                       .resizable()
-                                       .scaledToFit()
-                                       .frame(width: 20, height: 20)
-                                       .padding()
-                                       .background(Material.bar)
-                                       .clipShape(Circle())
-                                       .contentTransition(.symbolEffect(.replace))
-                                   }
-                               }
-                           }
-                           .frame(height: 200)
-                       }
-                }
-                if cards.isEmpty {
-                TextField(text: $cardsPrompt) {
-                    Text("Prompt for flashcards")
-                }
-                .onSubmit {
-                    if !cardsPrompt.isEmpty || isGenerating {
-                        Task {
-                            try? await generateCards()
+                    ForEach(expansion?.cards ?? [], id: \.id) { card in
+                        HStack {
+                            GenerableCardView(card: card)
+                            if completedCards.contains(where: {
+                                $0.front.text == (card.front ?? "") &&
+                                $0.back.text == (card.back ?? "")})
+                            {
+                                Button {
+                                    if parentSet.cards.contains(where: {
+                                        $0.front.text == (card.front ?? "") &&
+                                        $0.back.text == (card.back ?? "")}) {
+                                        withAnimation {
+                                            parentSet.cards.removeAll(where: {
+                                                $0.front.text == (card.front ?? "") &&
+                                                $0.back.text == (card.back ?? "")})
+                                            try? modelContext.save()
+                                        }
+                                    }
+                                    else {
+                                        withAnimation {
+                                            parentSet.cards.append(Card(front: card.front ?? "", back: card.back ?? ""))
+                                            try? modelContext.save()
+                                        }
+                                    }
+                                } label : {
+                                    Image(systemName: parentSet.cards.contains(where: {
+                                        $0.front.text == (card.front ?? "") &&
+                                        $0.back.text == (card.back ?? "")}) ?
+                                          "checkmark" : "plus")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 20, height: 20)
+                                    .padding()
+                                    .background(Material.bar)
+                                    .clipShape(Circle())
+                                    .contentTransition(.symbolEffect(.replace))
+                                }
+                            }
                         }
+                        .frame(height: 200)
                     }
                 }
-                .focused($promptFieldIsFocused)
-                .onAppear {
-                    promptFieldIsFocused = true
-                }
-                .submitLabel(.done)
-                
+                if expansion == nil {
+                    TextField(text: $cardsPrompt) {
+                        Text("Prompt for flashcards")
+                    }
+                    .onSubmit {
+                        if !cardsPrompt.isEmpty || isGenerating {
+                            Task {
+                                await generateCards()
+                            }
+                        }
+                    }
+                    .focused($promptFieldIsFocused)
+                    .onAppear {
+                        promptFieldIsFocused = true
+                    }
+                    .submitLabel(.done)
+                    
                     Button("Generate") {
                         Task {
-                            try? await generateCards()
+                                await generateCards()
                         }
                     }
                     .disabled(cardsPrompt.isEmpty || isGenerating)
@@ -126,10 +163,10 @@ struct GenerableAddCardView : View {
                                 completedCards = []
                                 isGenerating = true
                             }
-                            let stream = session.streamResponse(to: "The user rejected the previous cards, create a new set of them", generating: [GenerableCard].self)
+                            let stream = session.streamResponse(to: "The user rejected the previous cards, create a new set of them", generating: GenerableStudySetExpansion.self)
                             for try await partial in stream {
                                 await MainActor.run {
-                                    withAnimation { self.cards = partial.content }
+                                    withAnimation { self.expansion = partial.content }
                                 }
                             }
                             let finishedCards = try? await stream.collect().content
@@ -137,9 +174,7 @@ struct GenerableAddCardView : View {
                                 withAnimation {
                                     // Update partials one last time if available
                                     if let finished = finishedCards {
-                                        self.completedCards = finished.compactMap { gen in
-                                            gen.asCard()
-                                        }
+                                        self.completedCards = finished.toCards()
                                     }
                                     self.isGenerating = false
                                 }
@@ -159,37 +194,56 @@ struct GenerableAddCardView : View {
                     dismiss()
                 }
             }
+        }
     }
-    func generateCards() async throws{
+    func generateCards() async {
         withAnimation {
             isGenerating = true
         }
         let cardsPrompt = parentSet.setTextualRepresentation() + "User Request: \(cardsPrompt)" + "You should create entirely new cards, do NOT create any duplicates that were described above, only new cards. Please ensure that the content of the cards you generate strictly abide by the users prompt for each card generated."
-        let stream = session.streamResponse(to: cardsPrompt, generating: [GenerableCard].self)
-        for try await partial in stream {
+        do {
+            let stream = session.streamResponse(to: cardsPrompt, generating: GenerableStudySetExpansion.self)
+            for try await partial in stream {
+                await MainActor.run {
+                    withAnimation { self.expansion = partial.content }
+                }
+            }
+            let finishedCards = try? await stream.collect().content
             await MainActor.run {
-                withAnimation { self.cards = partial.content }
+                withAnimation {
+                    // Update partials one last time if available
+                    if let finished = finishedCards {
+                        self.completedCards = finished.toCards()
+                    }
+                    self.isGenerating = false
+                }
             }
         }
-        let finishedCards = try? await stream.collect().content
-        await MainActor.run {
-            withAnimation {
-                // Update partials one last time if available
-                if let finished = finishedCards {
-                    self.completedCards = finished.compactMap { gen in
-                        gen.asCard()
-                    }
-                }
-                self.isGenerating = false
-            }
+        catch LanguageModelSession.GenerationError.unsupportedLanguageOrLocale {
+            errorMessage = "Unsupported Locale or Language"
+        }
+        catch LanguageModelSession.GenerationError.exceededContextWindowSize {
+            errorMessage = "Context Window Exceeded"
+        }
+        catch LanguageModelSession.GenerationError.refusal {
+            errorMessage = "Generation Refused by Model"
+        }
+        catch LanguageModelSession.GenerationError.guardrailViolation {
+            errorMessage = "Model Indicated Guardrail Violation"
+        }
+        catch {
+            errorMessage = error.localizedDescription
+        }
+        if errorMessage != nil {
+            self.isGenerating = false
         }
     }
     func cardsContainGenerableCard(genCard: GenerableCard?, cards: [Card]) -> Bool {
         /*if !parentSet.cards.contains(where: {
-            $0.front.text == (card.front ?? "") &&
-            $0.back.text == (card.back ?? "")}) {
-            parentSet.cards.append(card)
-        }*/
+         $0.front.text == (card.front ?? "") &&
+         $0.back.text == (card.back ?? "")}) {
+         parentSet.cards.append(card)
+         }*/
         if cards.contains(where: {
             $0.front.text == (genCard?.front ?? "") &&
             $0.back.text == (genCard?.back ?? "")
