@@ -10,14 +10,8 @@ import Charts
 
 struct StatsView: View {
     @EnvironmentObject var entitlement: EntitlementManager
+    @State var window: Int = 10
     let viewingSet: StudySet
-
-    // Tunable windows and thresholds
-    private let windows: [Int] = [5, 10, 25, 50]
-    private let retireAccuracyThreshold: Double = 0.90   // 90%
-    private let retireTimeThreshold: TimeInterval = 3.0  // seconds
-    private let struggleAccuracyThreshold: Double = 0.60 // 60%
-    private let struggleTimeThreshold: TimeInterval = 8.0 // seconds
 
     var body: some View {
         VStack {
@@ -31,26 +25,20 @@ struct StatsView: View {
                         Text("You have only tracked \(avgCardDataPoint) sessions on average per card. **Insight quality may be degraded**, practicing more will improve quality")
                     }
                 }
-                OverviewStatsCard(viewingSet: viewingSet, windows: windows)
+                OverviewStatsCard(viewingSet: viewingSet, window: $window)
                     
                 
                 // Progress over windows (Accuracy vs Time)
-                SetProgressCard(viewingSet: viewingSet, windows: windows)
+                SetProgressCard(viewingSet: viewingSet, window: $window)
                 
                 // Per-card difficulty scatter
-                CardDifficultyScatterCard(viewingSet: viewingSet, window: windows.last ?? 25)
+                CardDifficultyScatterCard(viewingSet: viewingSet, window: window)
                 
                 // Cards to consider retiring
-                RetireCandidatesCard(viewingSet: viewingSet,
-                                     window: windows.last ?? 25,
-                                     minAccuracy: retireAccuracyThreshold,
-                                     maxTime: retireTimeThreshold)
+                RetireCandidatesCard(viewingSet: viewingSet)
                 
                 // Cards to practice
-                StrugglingCardsCard(viewingSet: viewingSet,
-                                    window: windows.last ?? 25,
-                                    maxAccuracy: struggleAccuracyThreshold,
-                                    minTime: struggleTimeThreshold)
+                StrugglingCardsCard(viewingSet: viewingSet)
             }
             .padding(.horizontal)
             .padding(.vertical, 12)
@@ -67,7 +55,7 @@ struct StatsView: View {
 
 private struct OverviewStatsCard: View {
     let viewingSet: StudySet
-    let windows: [Int]
+    @Binding var window: Int
 
     private func averageAccuracy(window: Int) -> Double? {
         let values = viewingSet.cards.map { $0.stats.rollingPercentCorrect(recallWindow: window) * 100 }
@@ -101,9 +89,7 @@ private struct OverviewStatsCard: View {
             } else {
                 VStack(alignment: .leading, spacing: 12) {
                     // Latest window snapshot
-                    if let lastWindow = windows.last,
-                       let acc = averageAccuracy(window: lastWindow),
-                       let time = averageTime(window: lastWindow) {
+                    if let acc = averageAccuracy(window: window), let time = averageTime(window: window) {
                         HStack(spacing: 16) {
                             MetricPill(title: "Accuracy", value: String(format: "%.0f%%", acc), systemImage: "checkmark.seal.fill", tint: .green)
                             MetricPill(title: "Avg Time", value: String(format: "%.1fs", time), systemImage: "timer", tint: .blue)

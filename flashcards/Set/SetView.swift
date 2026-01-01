@@ -34,7 +34,7 @@ struct SetView: View {
                 }
                 if cardViewDislayed {
                     TabView {
-                        ForEach(set.cards){ card in
+                        ForEach(set.cards) { card in
                             CardView(card: card)
                                 .padding()
                             //.matchedGeometryEffect(id: card.id, in: namespace)
@@ -44,8 +44,8 @@ struct SetView: View {
                 }
                 else {
                     List{
-                            ForEach(set.cards){ card in
-                                CardView(card: card)
+                        ForEach($set.cards, id: \.persistentModelID) { $card in
+                            CardView(card: $card.wrappedValue)
                                     .frame(height: 150)
                                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                         Button(role: .destructive) {
@@ -66,6 +66,7 @@ struct SetView: View {
                                         
                                     }
                                     .listRowBackground(Color.clear)
+                                    
                             }
                             .listStyle(.plain)
                             .listRowSeparator(.hidden)
@@ -73,9 +74,14 @@ struct SetView: View {
                         
                     }
                     .listStyle(.inset)
-                    
-                    
                     .frame(maxHeight: .infinity)
+                }
+            }
+            .sheet(isPresented: $showPlaySelectionSheet) {
+                NavigationStack {
+                        PlaySelectionView(parentSet: set)
+                            .interactiveDismissDisabled()
+                            .presentationDetents([.medium])
                 }
             }
             .sheet(isPresented: $isAddCardSheetDisplayed) {
@@ -146,7 +152,8 @@ struct SetView: View {
                     }
                     
                     Button {
-                        router.push(.playSelectionView(setID: set.persistentModelID))
+                        //router.push(.playSelectionView(setID: set.persistentModelID))
+                        showPlaySelectionSheet = true
                     } label: {
                         Image(systemName: "play.fill")
                     }
@@ -156,7 +163,6 @@ struct SetView: View {
             .navigationTitle(set.title)
             .navigationBarTitleDisplayMode(.inline)
     }
-        
 }
 
 #Preview {

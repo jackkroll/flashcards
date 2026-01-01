@@ -184,21 +184,22 @@ struct ProFeatureComparison: View {
                     proHas: .available,
                     columnWidth: columnWidth
                 )
+                Button{
+                    router.push(.storeView)
+                } label: {
+                        Image(systemName: "sparkles")
+                        Text("Upgrade to Pro")
+                            .fontWeight(.semibold)
+                }
+                .buttonSizing(.flexible)
+                .buttonStyle(.glassProminent)
             } footer: {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Core features will **always** remain free for all. A pro plan supports development, while also giving you insights to support your studying.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
 
-                    Button{
-                        router.push(.storeView)
-                    } label: {
-                            Image(systemName: "sparkles")
-                            Text("Upgrade to Pro")
-                                .fontWeight(.semibold)
-                    }
-                    .buttonSizing(.flexible)
-                    .buttonStyle(.glassProminent)
+                    
                 }
                 .padding(.top, 4)
             }

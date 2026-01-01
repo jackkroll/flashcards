@@ -19,6 +19,19 @@ struct StudyView: View {
     @EnvironmentObject var router: Router
     @AppStorage("lastStudyDate") private var lastStudyDate: Date = .distantPast
     @AppStorage("currentStreak") private var currentStreak: Int = 0
+    
+    @AppStorage("strongMinPercentCorrectEnabled") private var strongMinPercentCorrectEnabled: Bool = true
+    @AppStorage("strongMinPercentCorrect") private var strongMinPercentCorrect: Double = 0.8
+    @AppStorage("strongMaxTimeToFlipEnabled") private var strongMaxTimeToFlipEnabled: Bool = false
+    @AppStorage("strongMaxTimeToFlipSeconds") private var strongMaxTimeToFlipSeconds: Double = 5
+    @AppStorage("strongRecallWindow") private var strongRecallWindow: Int = 10
+    
+    @AppStorage("weakMaxPercentCorrectEnabled") private var weakMaxPercentCorrectEnabled: Bool = true
+    @AppStorage("weakMaxPercentCorrect") private var weakMaxPercentCorrect: Double = 0.6
+    @AppStorage("weakMinTimeToFlipEnabled") private var weakMinTimeToFlipEnabled: Bool = false
+    @AppStorage("weakMinTimeToFlipSeconds") private var weakMinTimeToFlipSeconds: Double = 3
+    @AppStorage("weakRecallWindow") private var weakRecallWindow: Int = 10
+    
     @State var visibleCards: [Card] = []
     @State private var undoStack: [Card] = []
     @State private var correctStack: [Card] = []
@@ -33,19 +46,32 @@ struct StudyView: View {
                     if studySet.cards.isEmpty {
                         VStack {
                             ContentUnavailableView {
-                                Label("No Cards to Study!", systemImage: "star.fill")
+                                Label("No Cards to Study", systemImage: "exclamationmark.magnifyingglass")
                             } description: {
-                                Text("Great work! You completed a study set!")
-                                Text("\(correctStack.count) correct, \(incorrectStack.count) incorrect.")
+                                Text("You have no cards in this study set ")
                             }
                         }
                     }
-                    if visibleCards.isEmpty && studySet.cards.count > 0 {
+                    if visibleCards.isEmpty && undoStack.isEmpty {
                         ContentUnavailableView {
-                            Label("Study Session Completed", systemImage: "star.fill")
+                            Label("No Cards to Study", systemImage: "star.fill")
                         } description: {
-                            Text("Great work! You completed a study set!")
-                            Text("\(correctStack.count) correct, \(incorrectStack.count) incorrect.")
+                            Text("With your current settings, there are no cards that need to be studied!")
+                        }
+                    }
+                    if visibleCards.isEmpty && undoStack.count > 0 {
+                        VStack {
+                            ContentUnavailableView {
+                                Label("Study Session Completed", systemImage: "star.fill")
+                            } description: {
+                                Text("Great work! You completed a study set!")
+                                Text("\(correctStack.count) correct, \(incorrectStack.count) incorrect.")
+                                Button("Return to set") {
+                                    router.pop()
+                                }
+                                .buttonStyle(.glass)
+                            }
+                            
                         }
                     }
                     ForEach(visibleCards.enumerated(), id: \.element) { index, card in
@@ -159,29 +185,55 @@ struct StudyView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .onAppear {
-                // Streak updating
-                let calendar = Calendar.current
-                if calendar.isDateInYesterday(lastStudyDate) {
-                    currentStreak += 1
-                } else {
-                    // missed one or more days (or first time): start a new streak
-                    currentStreak = 1
-                }
-                lastStudyDate = .now
-                
-                studySet.lastStudied = .now
-                
-                studyStartTime = .now
-                if visibleCards.isEmpty {
-                    var baseArr : [Card] = studySet.cards
-                    baseArr.reverse()
-                    if shouldShuffle {
-                        baseArr.shuffle()
+                Task {
+                    // Streak updating
+                    let calendar = Calendar.current
+                    if calendar.isDateInYesterday(lastStudyDate) {
+                        currentStreak += 1
+                    } else {
+                        // missed one or more days (or first time): start a new streak
+                        currentStreak = 1
                     }
-                    if let stackSize = subsetSize {
-                        baseArr = Array(baseArr.prefix(stackSize))
+                    lastStudyDate = .now
+                    
+                    studySet.lastStudied = .now
+                    
+                    studyStartTime = .now
+                    if visibleCards.isEmpty {
+                        var baseArr : [Card] = studySet.cards
+                        baseArr.reverse()
+                        if shouldShuffle {
+                            baseArr.shuffle()
+                        }
+                        if let stackSize = subsetSize {
+                            baseArr = Array(baseArr.prefix(stackSize))
+                        }
+                        
+                        // Pro features, remove strong cards from set
+                        if !includeStrongCards {
+                            baseArr = baseArr.filter { card in
+                                !card.determineIfStrong(
+                                    minPercentCorrect: strongMinPercentCorrectEnabled ? strongMinPercentCorrect : nil,
+                                    maxTimeToFlip: strongMaxTimeToFlipEnabled ? strongMaxTimeToFlipSeconds : nil,
+                                    recallWindow: strongRecallWindow
+                                )
+                            }
+                        }
+                        
+                        // Pro Feature, only include weak cards
+                        if shouldFocusOnWeakCards {
+                            baseArr = baseArr.filter { card in
+                                card.determineIfWeak(
+                                    maxPercentCorrect: weakMaxPercentCorrectEnabled ? weakMaxPercentCorrect : nil,
+                                    minTimeToFlip: weakMinTimeToFlipEnabled ? weakMinTimeToFlipSeconds : nil,
+                                    recallWindow: weakRecallWindow
+                                )
+                            }
+                        }
+                         
+                        visibleCards = baseArr
+                        
                     }
-                    visibleCards = baseArr
                 }
             }
             .onDisappear {

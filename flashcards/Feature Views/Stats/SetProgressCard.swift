@@ -10,7 +10,7 @@ import Charts
 
 struct SetProgressCard: View {
     let viewingSet: StudySet
-    let windows: [Int]
+    @Binding var window : Int
 
     private struct SeriesPoint: Identifiable {
         let id = UUID()
@@ -104,6 +104,7 @@ struct SetProgressCard: View {
 }
 
 #Preview {
+    @Previewable @State var window = 10
     let studySet: StudySet = {
         let s = StudySet()
         let calendar = Calendar.current
@@ -137,5 +138,5 @@ struct SetProgressCard: View {
         }
         return s
     }()
-    return SetProgressCard(viewingSet: studySet, windows: [5, 10, 25, 50])
+    return SetProgressCard(viewingSet: studySet, window: $window)
 }

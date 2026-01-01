@@ -30,8 +30,10 @@ struct AddCardView: View {
                     Section("Front"){
                         Picker("Content Type", selection: $frontType) {
                             ForEach(SingleSide.SideType.allCases, id: \.rawValue) { type in
-                                Text(String(describing: type).capitalized(with: Locale.current))
-                                    .tag(type)
+                                if type != .audio {
+                                    Text(String(describing: type).capitalized(with: Locale.current))
+                                        .tag(type)
+                                }
                             }
                         }
                         switch frontType {
@@ -67,8 +69,11 @@ struct AddCardView: View {
                     Section("Back") {
                         Picker("Content Type", selection: $backType) {
                             ForEach(SingleSide.SideType.allCases, id: \.rawValue) { type in
-                                Text(String(describing: type).capitalized(with: Locale.current))
-                                    .tag(type)
+                                if type != .audio {
+                                    Text(String(describing: type).capitalized(with: Locale.current))
+                                        .tag(type)
+                                }
+                                    
                             }
                         }
                         
@@ -114,7 +119,7 @@ struct AddCardView: View {
                     .fontWeight(.semibold)
                     .buttonSizing(.flexible)
                     .buttonStyle(.glass)
-                    .tint(parentCard != nil ? .blue : .green)
+                    //.tint(parentCard != nil ? .blue : .green)
                     if parentCard == nil {
                         Button("Add Card + Continue Adding") {
                             Task(priority: .userInitiated) {
@@ -151,6 +156,7 @@ struct AddCardView: View {
                         frontText = card.front.text ?? ""
                     case .image:
                         selectedImageFront = card.front.fetchImage()
+                        frontType = .image
                     case .audio:
                         break
                     }
@@ -160,6 +166,7 @@ struct AddCardView: View {
                         backText = card.back.text ?? ""
                     case .image:
                         selectedImageBack = card.back.fetchImage()
+                        backType = .image
                     case .audio:
                         break
                     }
@@ -239,5 +246,10 @@ struct AddCardView: View {
 
 #Preview("Add Card Sheet") {
     AddCardView(parentSet: StudySet())
+        .modelContainer(for: StudySet.self, inMemory: true)
+}
+
+#Preview("Update Card") {
+    AddCardView(parentSet: StudySet(), parentCard: Card(front: "Term", back: "Answer"))
         .modelContainer(for: StudySet.self, inMemory: true)
 }

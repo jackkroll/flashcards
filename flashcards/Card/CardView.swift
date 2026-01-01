@@ -26,7 +26,7 @@ struct CardView: View {
     @State var card: Card? = nil
     
     var body: some View {
-        RoundedRectangle(cornerRadius: 50)
+        ConcentricRectangle(corners: .concentric(minimum: 50), isUniform: true)
             .foregroundStyle(.background.secondary)
             .overlay {
                 ZStack {
@@ -133,8 +133,8 @@ struct CardContentView : View {
                     Image(uiImage: uiImg)
                         .resizable()
                         .scaledToFit()
-                        .padding()
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .clipped(antialiased: true)
+                        .clipShape(ConcentricRectangle(corners: .concentric(minimum: 12), isUniform: true))
                 }
             }
         case .audio:
@@ -144,10 +144,27 @@ struct CardContentView : View {
 }
 
 #Preview("Card Added"){
-    CardView(card: Card(front: "Front Side", back: "Back Side"))
-        .environmentObject(EntitlementManager())
+    VStack {
+        CardView(card: Card(front: "Front Side", back: "Back Side"))
+        CardView(card: Card(front: "Front Side", back: "Back Side"))
+            .frame(height: 200)
+    }
+    .environmentObject(EntitlementManager())
+}
+#Preview("Image Card") {
+    let card = Card(front: SingleSide(img: Image(systemName: "apple.logo")), back: SingleSide(img: Image(systemName: "apple.logo")))
+    VStack {
+        CardView(card: card)
+        CardView(card: card)
+            .frame(height: 200)
+    }
+    .environmentObject(EntitlementManager())
 }
 #Preview("No Card"){
-    CardView(card: nil)
-        .environmentObject(EntitlementManager())
+    VStack {
+        CardView(card: nil)
+        CardView(card: nil)
+            .frame(height: 200)
+    }
+    .environmentObject(EntitlementManager())
 }

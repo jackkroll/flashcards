@@ -11,6 +11,7 @@ import SwiftData
 struct PlaySelectionView: View {
     @EnvironmentObject var entitlement: EntitlementManager
     @EnvironmentObject var router: Router
+    @Environment(\.dismiss) var dismiss
     let parentSet: StudySet
     @State var shuffle: Bool = true
     @State var focusOnWeakCards: Bool = false
@@ -21,67 +22,65 @@ struct PlaySelectionView: View {
     var body: some View {
         VStack(spacing: 20){
             //Specific Mode Selection
-            GroupBox {
-                HStack {
-                    Text("Review Mode Selection:")
-                    Spacer()
-                    Picker("Mode Selection",selection: $modeSelected) {
-                        Text("Flashcards").tag(AvailableModes.flashcards)
-                        Text("MCQ (Coming Soon)").tag(AvailableModes.mcq).selectionDisabled()
+            /*
+            HStack {
+                Text("Mode Selection")
+                Picker("Mode Selection",selection: $modeSelected) {
+                    Text("Flashcards").tag(AvailableModes.flashcards)
+                    Text("MCQ (Coming Soon)").tag(AvailableModes.mcq).selectionDisabled()
+                }
+                .pickerStyle(.segmented)
+            }*/
+            ScrollView {
+                Toggle(isOn: $shuffle, label: {
+                    Image(systemName: "shuffle")
+                    Text("Randomly review cards")
+                })
+                .padding(10)
+                Toggle(isOn: $lightningReview, label: {
+                    Image(systemName: "bolt")
+                    Text("Review a small number of cards quickly")
+                })
+                .padding(10)
+                if lightningReview && parentSet.cards.count > 2 {
+                    HStack {
+                        Text("Cards: \(numToReview.formatted(.number))")
+                            .contentTransition(.numericText())
+                        Slider(value: $numToReview, in: 1...(Float(parentSet.cards.count) - 1), step: 1)
                     }
-                    .pickerStyle(.menu)
-                }
-                VStack {
-                    GroupBox("Flashcard Review") {
-                        Text("Traditional flashcard review that you mark if you got correct or not.")
-                    }
-                }
-            }
-            Toggle(isOn: $shuffle, label: {
-                Image(systemName: "shuffle")
-                Text("Randomly Review Cards")
-            })
-            Toggle(isOn: $lightningReview, label: {
-                Image(systemName: "bolt")
-                Text("Review a small number of cards quickly")
-            })
-            if lightningReview && parentSet.cards.count > 2 {
-                HStack {
-                    Text("Cards: \(numToReview.formatted(.number))")
-                        .contentTransition(.numericText())
-                    Slider(value: $numToReview, in: 1...(Float(parentSet.cards.count) - 1), step: 1)
-                }
-                .onAppear {
-                    withAnimation {
-                        numToReview = Float(Int(parentSet.cards.count/2))
+                    .onAppear {
+                        withAnimation {
+                            numToReview = Float(Int(parentSet.cards.count/2))
+                        }
                     }
                 }
-            }
-            if !shuffle && lightningReview {
-                Text("This combination will lead to just the first \(numToReview.formatted(.number)) cards being reviewed.")
+                if !shuffle && lightningReview {
+                    Text("This combination will lead to just the first \(numToReview.formatted(.number)) cards being reviewed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                
+                Divider()
+                Text("RECALL: PRO")
                     .font(.caption)
+                    .fontWeight(.semibold)
+                    .monospaced()
                     .foregroundStyle(.secondary)
+                Group {
+                    Toggle(isOn: $focusOnWeakCards, label: {
+                        Image(systemName: "sparkle.magnifyingglass")
+                        Text("Focus on weak cards")
+                    })
+                    Toggle(isOn: $includeStrongCards, label: {
+                        Image(systemName: "hand.thumbsup")
+                        Text("Include strong cards")
+                    })
+                }
+                .padding(10)
+                .disabled(!entitlement.hasPro)
             }
-            
-            Divider()
-            Text("RECALL: PRO")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .monospaced()
-                .foregroundStyle(.secondary)
-            Group {
-                Toggle(isOn: $focusOnWeakCards, label: {
-                    Image(systemName: "sparkle.magnifyingglass")
-                    Text("Focus on Weak Cards")
-                })
-                Toggle(isOn: $includeStrongCards, label: {
-                    Image(systemName: "hand.thumbsup")
-                    Text("Include Strong Cards")
-                })
-            }
-            .disabled(!entitlement.hasPro)
-            Spacer()
             Button {
+                dismiss()
                 router.push(.study(studySet: parentSet.persistentModelID,
                                    shuffle: shuffle,
                                    subsetSize: lightningReview ? Int(numToReview) : nil,
@@ -96,9 +95,12 @@ struct PlaySelectionView: View {
             .disabled(parentSet.cards.count == 0)
             .buttonSizing(.flexible)
             .buttonStyle(.glassProminent)
-            .padding(.top, 50)
+            .padding(.top, 20)
+            .padding(.horizontal, 5)
         }
-        .padding()
+        .navigationTitle("Review Settings")
+        .navigationBarTitleDisplayMode(.inline)
+        //.padding(5)
         .onChange(of: focusOnWeakCards) {
             if focusOnWeakCards && includeStrongCards {
                 withAnimation {
@@ -111,6 +113,11 @@ struct PlaySelectionView: View {
                 withAnimation {
                     focusOnWeakCards = false
                 }
+            }
+        }
+        .toolbar {
+            Button(role: .cancel) {
+                dismiss()
             }
         }
         

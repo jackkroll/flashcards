@@ -13,6 +13,7 @@ import Shimmer
 struct StoreView: View {
     @EnvironmentObject var entitlement: EntitlementManager
     @EnvironmentObject var router: Router
+    @State var offerCodeSheet: Bool = false
     var body: some View {
             SubscriptionStoreView(groupID: "21863675") {
                 VStack {
@@ -44,6 +45,14 @@ struct StoreView: View {
                     MeshBackground()
                 }
                 
+            }
+            .offerCodeRedemption(isPresented: $offerCodeSheet)
+            .safeAreaInset(edge: .bottom) {
+                Button("Redeem offer code") {
+                    offerCodeSheet = true
+                }
+                .buttonStyle(.glass)
+                .padding()
             }
             .backgroundStyle(.thinMaterial)
             .navigationBarBackButtonHidden()
