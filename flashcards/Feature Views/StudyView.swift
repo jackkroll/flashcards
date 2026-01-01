@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct StudyView: View {
     let studySet : StudySet
@@ -197,6 +198,7 @@ struct StudyView: View {
                     lastStudyDate = .now
                     
                     studySet.lastStudied = .now
+                    WidgetCenter.shared.reloadTimelines(ofKind: "StreakWidget")
                     
                     studyStartTime = .now
                     if visibleCards.isEmpty {
