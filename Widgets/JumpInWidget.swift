@@ -45,24 +45,32 @@ struct JumpInWidget : View {
     var entry: JumpInWidgetProvider.Entry
 
     var body: some View {
+        let set : StudySet? = sets.randomElement()
         VStack {
-            let set : StudySet? = sets.randomElement()
-                Text(set?.title.uppercased() ?? "Unknown")
-                .font(.title3)
+            if let set = set {
+                Text(set.title.uppercased())
+                    .font(.title3)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
                     .padding(3)
                     .minimumScaleFactor(0.5)
-            HStack {
-                Image(systemName: "rectangle.fill.on.rectangle.angled.fill")
-                Text("\((set?.cards.count ?? 0).formatted(.number)) CARDS")
-                    .font(.caption)
+                HStack {
+                    Image(systemName: "rectangle.fill.on.rectangle.angled.fill")
+                    Text("\((set.cards.count).formatted(.number)) CARDS")
+                        .font(.caption)
+                }
+                HStack {
+                    Image(systemName: "clock.fill")
+                    Text(set.lastStudied?.formatted(date: .abbreviated, time: .omitted) ?? "Never Studied")
+                }
+                
+                .widgetURL(.init(string: "recallapp://open-set?setTitle=\(set.title)"))
             }
-            HStack {
-                Image(systemName: "clock.fill")
-                Text(set?.lastStudied?.formatted(date: .abbreviated, time: .omitted) ?? "Never Studied")
+            else {
+                Text("create a study set with recall")
             }
         }
+        
         .font(.caption)
         .foregroundStyle(.secondary)
         .fontWeight(.semibold)
@@ -72,13 +80,25 @@ struct JumpInWidget : View {
 
 struct JumpInWidgets: Widget {
     let kind: String = "JumpInWidget"
-    @Environment(\.modelContext) var modelContext
-    var previewContainer: ModelContainer?
+    
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: JumpInWidgetProvider()) { entry in
+        let sharedModelContainer: ModelContainer = {
+            let schema = Schema([
+                StudySet.self, Card.self, SingleSide.self
+            ])
+            let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier("group.JackKroll.recall"))
+
+            do {
+                return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            } catch {
+                fatalError("Could not create ModelContainer: \(error)")
+            }
+        }()
+
+        return AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: JumpInWidgetProvider()) { entry in
             JumpInWidget(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
-                .modelContext(previewContainer?.mainContext ?? modelContext)
+                .modelContainer(sharedModelContainer)
         }
     }
 }
@@ -107,11 +127,11 @@ extension ConfigurationAppIntent {
         for num in 1...20 {
             s.cards.append(Card(front: "Hello \(num.formatted(.number))", back: "World"))
         }
-        //s.lastStudied = .distantPast
+        s.lastStudied = .distantPast
         return s
     }()
     container.mainContext.insert(set)
-    return JumpInWidgets(previewContainer: container)
+    return JumpInWidgets()
 } timeline: {
     JumpInEntry(date: .now)
 }

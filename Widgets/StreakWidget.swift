@@ -14,16 +14,17 @@ struct StreakWidgetProvider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> StreakEntry {
-        let currentStreak = UserDefaults.standard.value(forKey: "currentStreak") as? Int ?? 0
-        let lastStudyDate = UserDefaults.standard.value(forKey: "lastStudyDate") as? Date ?? .distantPast
+        
+        let currentStreak = UserDefaults(suiteName: "group.JackKroll.recall")?.value(forKey: "currentStreak") as? Int ?? 0
+        let lastStudyDate = UserDefaults(suiteName: "group.JackKroll.recall")?.value(forKey: "lastStudyDate") as? Date ?? .distantPast
         return StreakEntry(date: Date(), currentStreak: currentStreak, lastStudyDate: lastStudyDate)
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<StreakEntry> {
         var entries: [StreakEntry] = []
         
-        let currentStreak = UserDefaults.standard.value(forKey: "currentStreak") as? Int ?? 0
-        let lastStudyDate = UserDefaults.standard.value(forKey: "lastStudyDate") as? Date ?? .distantPast
+        let currentStreak = UserDefaults(suiteName: "group.JackKroll.recall")?.value(forKey: "currentStreak") as? Int ?? 0
+        let lastStudyDate = UserDefaults(suiteName: "group.JackKroll.recall")?.value(forKey: "lastStudyDate") as? Date ?? .distantPast
         let calendar = Calendar.current
         
         let isActive = calendar.isDate(.now, inSameDayAs: lastStudyDate)

@@ -8,10 +8,13 @@
 import SwiftUI
 import StoreKit
 import SwiftData
+import WidgetKit
 
 struct SettingsView: View {
-    @AppStorage("lastStudyDate") private var lastStudyDate: Date = .distantPast
-    @AppStorage("currentStreak") private var currentStreak: Int = 0
+    @AppStorage("lastStudyDate",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var lastStudyDate: Date = .distantPast
+    @AppStorage("currentStreak",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var currentStreak: Int = 0
     @EnvironmentObject var entitlement: EntitlementManager
     @Environment(\.modelContext) var modelContext
     @State private var deleteAllDataAlertIsPresented: Bool = false
@@ -115,18 +118,27 @@ struct SettingsView: View {
                              """)
                     }
                 }
-                /*
+                
                 Section("Developer") {
+                    
                     Button("Add Demo Sets") {
                         addDemoSets()
+                        WidgetCenter.shared.reloadTimelines(ofKind: "JumpInWidget")
                     }
                     
-                    Button("Set Streak") {
+                    Button("Update Streak") {
                         lastStudyDate = .now
                         currentStreak = 2
+                        WidgetCenter.shared.reloadTimelines(ofKind: "StreakWidget")
+                    }
+                    
+                    Button("Reset Streak") {
+                        lastStudyDate = .distantPast
+                        currentStreak = 0
+                        WidgetCenter.shared.reloadTimelines(ofKind: "StreakWidget")
                     }
                 }
-                 */
+                 
                 
             }
 

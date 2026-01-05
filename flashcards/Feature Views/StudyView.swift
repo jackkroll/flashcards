@@ -18,8 +18,10 @@ struct StudyView: View {
     
     @EnvironmentObject var entitlement: EntitlementManager
     @EnvironmentObject var router: Router
-    @AppStorage("lastStudyDate") private var lastStudyDate: Date = .distantPast
-    @AppStorage("currentStreak") private var currentStreak: Int = 0
+    @AppStorage("lastStudyDate",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var lastStudyDate: Date = .distantPast
+    @AppStorage("currentStreak",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var currentStreak: Int = 0
     
     @AppStorage("strongMinPercentCorrectEnabled") private var strongMinPercentCorrectEnabled: Bool = true
     @AppStorage("strongMinPercentCorrect") private var strongMinPercentCorrect: Double = 0.8
