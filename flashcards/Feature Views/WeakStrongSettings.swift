@@ -8,17 +8,27 @@
 import SwiftUI
 
 struct WeakStrongSettings: View {
-    @AppStorage("strongMinPercentCorrectEnabled") private var strongMinPercentCorrectEnabled: Bool = true
-    @AppStorage("strongMinPercentCorrect") private var strongMinPercentCorrect: Double = 0.8
-    @AppStorage("strongMaxTimeToFlipEnabled") private var strongMaxTimeToFlipEnabled: Bool = false
-    @AppStorage("strongMaxTimeToFlipSeconds") private var strongMaxTimeToFlipSeconds: Double = 5
-    @AppStorage("strongRecallWindow") private var strongRecallWindow: Int = 10
+    @AppStorage("strongMinPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrectEnabled: Bool = true
+    @AppStorage("strongMinPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrect: Double = 0.8
+    @AppStorage("strongMaxTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipEnabled: Bool = false
+    @AppStorage("strongMaxTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipSeconds: Double = 5
+    @AppStorage("strongRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongRecallWindow: Int = 10
 
-    @AppStorage("weakMaxPercentCorrectEnabled") private var weakMaxPercentCorrectEnabled: Bool = true
-    @AppStorage("weakMaxPercentCorrect") private var weakMaxPercentCorrect: Double = 0.4
-    @AppStorage("weakMinTimeToFlipEnabled") private var weakMinTimeToFlipEnabled: Bool = false
-    @AppStorage("weakMinTimeToFlipSeconds") private var weakMinTimeToFlipSeconds: Double = 7
-    @AppStorage("weakRecallWindow") private var weakRecallWindow: Int = 10
+    @AppStorage("weakMaxPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrectEnabled: Bool = true
+    @AppStorage("weakMaxPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrect: Double = 0.4
+    @AppStorage("weakMinTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipEnabled: Bool = false
+    @AppStorage("weakMinTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipSeconds: Double = 7
+    @AppStorage("weakRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakRecallWindow: Int = 10
     
     // Shows the footer only when at least one toggle is currently disabled
     private var anyToggleDisabled: Bool {

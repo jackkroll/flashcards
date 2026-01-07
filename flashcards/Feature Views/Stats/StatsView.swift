@@ -19,26 +19,42 @@ struct StatsView: View {
             Group {
                 //VStack(alignment: .leading, spacing: 16) {
                 // Overview
-                let avgCardDataPoint = viewingSet.cards.flatMap({ $0.stats.recordedStats }).count / viewingSet.cards.count
-                if avgCardDataPoint <= 3 {
-                    InfoCard(title: "Few Data Points Logged") {
-                        Text("You have only tracked \(avgCardDataPoint) sessions on average per card. **Insight quality may be degraded**, practicing more will improve quality")
+                if viewingSet.cards.isEmpty {
+                    ContentUnavailableView {
+                        Label("Set has no Cards", systemImage: "square.stack.fill")
+                    } description: {
+                        Text("Add cards to this set, and study them to see your stats show up here")
+                    }
+                } else {
+                    let avgCardDataPoint = viewingSet.cards.flatMap({ $0.stats.recordedStats }).count / viewingSet.cards.count
+                    if avgCardDataPoint == 0 {
+                        ContentUnavailableView {
+                            Label("No Study Sessions Recorded", systemImage: "exclamationmark.triangle.fill")
+                        } description: {
+                            Text("Study this set to see your stats here")
+                        }
+                    }
+                    else if avgCardDataPoint <= 3 {
+                        InfoCard(title: "Few Data Points Logged") {
+                            Text("You have only tracked \(avgCardDataPoint) sessions on average per card. **Insight quality may be degraded**, practicing more will improve quality")
+                        }
+                    }
+                    if avgCardDataPoint > 0 {
+                        OverviewStatsCard(viewingSet: viewingSet, window: $window)
+                        
+                        // Progress over windows (Accuracy vs Time)
+                        SetProgressCard(viewingSet: viewingSet, window: $window)
+                        
+                        // Per-card difficulty scatter
+                        CardDifficultyScatterCard(viewingSet: viewingSet, window: window)
+                        
+                        // Cards to consider retiring
+                        RetireCandidatesCard(viewingSet: viewingSet)
+                        
+                        // Cards to practice
+                        StrugglingCardsCard(viewingSet: viewingSet)
                     }
                 }
-                OverviewStatsCard(viewingSet: viewingSet, window: $window)
-                    
-                
-                // Progress over windows (Accuracy vs Time)
-                SetProgressCard(viewingSet: viewingSet, window: $window)
-                
-                // Per-card difficulty scatter
-                CardDifficultyScatterCard(viewingSet: viewingSet, window: window)
-                
-                // Cards to consider retiring
-                RetireCandidatesCard(viewingSet: viewingSet)
-                
-                // Cards to practice
-                StrugglingCardsCard(viewingSet: viewingSet)
             }
             .padding(.horizontal)
             .padding(.vertical, 12)
@@ -154,6 +170,23 @@ private struct MetricPill: View {
             for _ in 1...3 {
                 card.stats.record(timeToFlip: .random(in: 2...20), gotCorrect: Bool.random())
             }
+            s.cards.append(card)
+        }
+        return s
+    }()
+    return NavigationStack { StatsView(viewingSet: studySet).environmentObject(EntitlementManager()) }
+}
+
+#Preview("Empty Set"){
+    let studySet: StudySet = .init(title: "Title")
+    return NavigationStack { StatsView(viewingSet: studySet).environmentObject(EntitlementManager()) }
+}
+
+#Preview("No Recorded Stats"){
+    let studySet: StudySet = {
+        let s = StudySet()
+        for i in 1...20 {
+            let card = Card(front: "Front #\(i)", back: "Back #\(i)")
             s.cards.append(card)
         }
         return s

@@ -162,9 +162,14 @@ final class Card {
         self.stats = CardStats()
     }
     
-    func determineIfStrong(minPercentCorrect: Double?, maxTimeToFlip: TimeInterval?, recallWindow: Int = 10) -> Bool {
+    func determineIfStrong(minPercentCorrect: Double?, maxTimeToFlip: TimeInterval?, recallWindow: Int = 10, minimumReviewCount: Int = 1) -> Bool {
         let percentCorrect = self.stats.rollingPercentCorrect(recallWindow: recallWindow)
         let timeToFlip = self.stats.avgTimeToFlip(recallWindow: recallWindow)
+        
+        // If it hasn't even been studied minimum number of times, confidence would be too low
+        if self.stats.recordedStats.count < minimumReviewCount {
+            return false
+        }
         
         // If the percent correct is less than the minimum threshold, invalidate
         if let minPercentCorrect = minPercentCorrect {
@@ -182,9 +187,14 @@ final class Card {
         return true
     }
     
-    func determineIfWeak(maxPercentCorrect: Double?, minTimeToFlip: TimeInterval?, recallWindow: Int = 10) -> Bool {
+    func determineIfWeak(maxPercentCorrect: Double?, minTimeToFlip: TimeInterval?, recallWindow: Int = 10, minimumReviewCount: Int = 1) -> Bool {
         let percentCorrect = self.stats.rollingPercentCorrect(recallWindow: recallWindow)
         let timeToFlip = self.stats.avgTimeToFlip(recallWindow: recallWindow)
+        
+        // If it hasn't even been studied minimum number of times, confidence would be too low
+        if self.stats.recordedStats.count < minimumReviewCount {
+            return false
+        }
         
         // If the percent correct is higher than the minimum needed, invalidate
         if let maxPercentCorrect = maxPercentCorrect {
