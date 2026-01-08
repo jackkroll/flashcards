@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct StreakToolbarItem: ToolbarContent {
-    @AppStorage("lastStudyDate") private var lastStudyDate: Date = .distantPast
-    @AppStorage("currentStreak") private var currentStreak: Int = 0
+    @AppStorage("lastStudyDate",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var lastStudyDate: Date = .distantPast
+    @AppStorage("currentStreak",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var currentStreak: Int = 0
     let placement: ToolbarItemPlacement
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: placement){

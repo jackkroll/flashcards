@@ -131,6 +131,8 @@ struct ContentView: View {
                 
                 ToolbarSpacer(.flexible, placement: .bottomBar)
                 
+                
+                
                 ToolbarItem(placement: .bottomBar) {
                     Button {
                         router.push(.settings)
@@ -140,6 +142,7 @@ struct ContentView: View {
                 }
             }
         }
+        .onOpenURL(perform: handleURL)
     }
 
     private func deleteItems(offsets: IndexSet) {
@@ -148,6 +151,27 @@ struct ContentView: View {
                 modelContext.delete(sets[index])
             }
         }
+    }
+    
+    func handleURL(url: URL) {
+        print("handling URL \(url.absoluteString)")
+        guard url.scheme == "recallapp" else { return }
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            print("Invalid URL")
+            return
+        }
+
+        guard let action = components.host, action == "open-set" else {
+            print("Unknown URL, we can't handle this one!")
+            return
+        }
+
+        guard let setTitle = components.queryItems?.first(where: { $0.name == "setTitle" })?.value else {
+            print("Set not found")
+            return
+        }
+        guard let selectedSetID = sets.first(where: {$0.title.elementsEqual(setTitle)}) else { return }
+        router.push(.set(setID: selectedSetID.persistentModelID))
     }
 }
 

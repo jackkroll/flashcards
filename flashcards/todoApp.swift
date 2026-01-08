@@ -17,7 +17,7 @@ struct todoApp: App {
         let schema = Schema([
             StudySet.self, Card.self, SingleSide.self
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier("group.JackKroll.recall"))
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])

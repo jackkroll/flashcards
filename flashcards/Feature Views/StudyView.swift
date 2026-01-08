@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct StudyView: View {
     let studySet : StudySet
@@ -17,20 +18,32 @@ struct StudyView: View {
     
     @EnvironmentObject var entitlement: EntitlementManager
     @EnvironmentObject var router: Router
-    @AppStorage("lastStudyDate") private var lastStudyDate: Date = .distantPast
-    @AppStorage("currentStreak") private var currentStreak: Int = 0
+    @AppStorage("lastStudyDate",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var lastStudyDate: Date = .distantPast
+    @AppStorage("currentStreak",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var currentStreak: Int = 0
     
-    @AppStorage("strongMinPercentCorrectEnabled") private var strongMinPercentCorrectEnabled: Bool = true
-    @AppStorage("strongMinPercentCorrect") private var strongMinPercentCorrect: Double = 0.8
-    @AppStorage("strongMaxTimeToFlipEnabled") private var strongMaxTimeToFlipEnabled: Bool = false
-    @AppStorage("strongMaxTimeToFlipSeconds") private var strongMaxTimeToFlipSeconds: Double = 5
-    @AppStorage("strongRecallWindow") private var strongRecallWindow: Int = 10
+    @AppStorage("strongMinPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrectEnabled: Bool = true
+    @AppStorage("strongMinPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrect: Double = 0.8
+    @AppStorage("strongMaxTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipEnabled: Bool = false
+    @AppStorage("strongMaxTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipSeconds: Double = 5
+    @AppStorage("strongRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongRecallWindow: Int = 10
     
-    @AppStorage("weakMaxPercentCorrectEnabled") private var weakMaxPercentCorrectEnabled: Bool = true
-    @AppStorage("weakMaxPercentCorrect") private var weakMaxPercentCorrect: Double = 0.6
-    @AppStorage("weakMinTimeToFlipEnabled") private var weakMinTimeToFlipEnabled: Bool = false
-    @AppStorage("weakMinTimeToFlipSeconds") private var weakMinTimeToFlipSeconds: Double = 3
-    @AppStorage("weakRecallWindow") private var weakRecallWindow: Int = 10
+    @AppStorage("weakMaxPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrectEnabled: Bool = true
+    @AppStorage("weakMaxPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrect: Double = 0.6
+    @AppStorage("weakMinTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipEnabled: Bool = false
+    @AppStorage("weakMinTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipSeconds: Double = 3
+    @AppStorage("weakRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakRecallWindow: Int = 10
     
     @State var visibleCards: [Card] = []
     @State private var undoStack: [Card] = []
@@ -197,6 +210,7 @@ struct StudyView: View {
                     lastStudyDate = .now
                     
                     studySet.lastStudied = .now
+                    WidgetCenter.shared.reloadTimelines(ofKind: "StreakWidget")
                     
                     studyStartTime = .now
                     if visibleCards.isEmpty {

@@ -10,11 +10,16 @@ import SwiftUI
 struct RetireCandidatesCard: View {
     let viewingSet: StudySet
 
-    @AppStorage("strongMinPercentCorrectEnabled") private var strongMinPercentCorrectEnabled: Bool = true
-    @AppStorage("strongMinPercentCorrect") private var strongMinPercentCorrect: Double = 0.4
-    @AppStorage("strongMaxTimeToFlipEnabled") private var strongMaxTimeToFlipEnabled: Bool = true
-    @AppStorage("strongMaxTimeToFlipSeconds") private var strongMaxTimeToFlipSeconds: Double = 9
-    @AppStorage("strongRecallWindow") private var strongRecallWindow: Int = 25
+    @AppStorage("strongMinPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrectEnabled: Bool = true
+    @AppStorage("strongMinPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrect: Double = 0.4
+    @AppStorage("strongMaxTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipEnabled: Bool = true
+    @AppStorage("strongMaxTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipSeconds: Double = 9
+    @AppStorage("strongRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongRecallWindow: Int = 25
 
     private struct Item: Identifiable {
         let id = UUID()
@@ -92,11 +97,16 @@ struct RetireCandidatesCard: View {
 struct StrugglingCardsCard: View {
     let viewingSet: StudySet
 
-    @AppStorage("weakMaxPercentCorrectEnabled") private var weakMaxPercentCorrectEnabled: Bool = true
-    @AppStorage("weakMaxPercentCorrect") private var weakMaxPercentCorrect: Double = 0.6
-    @AppStorage("weakMinTimeToFlipEnabled") private var weakMinTimeToFlipEnabled: Bool = true
-    @AppStorage("weakMinTimeToFlipSeconds") private var weakMinTimeToFlipSeconds: Double = 8
-    @AppStorage("weakRecallWindow") private var weakRecallWindow: Int = 25
+    @AppStorage("weakMaxPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrectEnabled: Bool = true
+    @AppStorage("weakMaxPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrect: Double = 0.6
+    @AppStorage("weakMinTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipEnabled: Bool = true
+    @AppStorage("weakMinTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipSeconds: Double = 8
+    @AppStorage("weakRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakRecallWindow: Int = 25
 
     private struct Item: Identifiable {
         let id = UUID()
@@ -180,11 +190,16 @@ struct StrugglingCardsCard: View {
 struct RetireCandidatesFullList: View {
     let viewingSet: StudySet
 
-    @AppStorage("strongMinPercentCorrectEnabled") private var strongMinPercentCorrectEnabled: Bool = true
-    @AppStorage("strongMinPercentCorrect") private var strongMinPercentCorrect: Double = 0.4
-    @AppStorage("strongMaxTimeToFlipEnabled") private var strongMaxTimeToFlipEnabled: Bool = true
-    @AppStorage("strongMaxTimeToFlipSeconds") private var strongMaxTimeToFlipSeconds: Double = 9
-    @AppStorage("strongRecallWindow") private var strongRecallWindow: Int = 25
+    @AppStorage("strongMinPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrectEnabled: Bool = true
+    @AppStorage("strongMinPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMinPercentCorrect: Double = 0.4
+    @AppStorage("strongMaxTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipEnabled: Bool = true
+    @AppStorage("strongMaxTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongMaxTimeToFlipSeconds: Double = 9
+    @AppStorage("strongRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var strongRecallWindow: Int = 25
 
     private struct RowItem: Identifiable {
         let id = UUID()
@@ -239,11 +254,16 @@ struct RetireCandidatesFullList: View {
 struct StrugglingCardsFullList: View {
     let viewingSet: StudySet
 
-    @AppStorage("weakMaxPercentCorrectEnabled") private var weakMaxPercentCorrectEnabled: Bool = true
-    @AppStorage("weakMaxPercentCorrect") private var weakMaxPercentCorrect: Double = 0.6
-    @AppStorage("weakMinTimeToFlipEnabled") private var weakMinTimeToFlipEnabled: Bool = true
-    @AppStorage("weakMinTimeToFlipSeconds") private var weakMinTimeToFlipSeconds: Double = 8
-    @AppStorage("weakRecallWindow") private var weakRecallWindow: Int = 25
+    @AppStorage("weakMaxPercentCorrectEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrectEnabled: Bool = true
+    @AppStorage("weakMaxPercentCorrect",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMaxPercentCorrect: Double = 0.6
+    @AppStorage("weakMinTimeToFlipEnabled",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipEnabled: Bool = true
+    @AppStorage("weakMinTimeToFlipSeconds",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakMinTimeToFlipSeconds: Double = 8
+    @AppStorage("weakRecallWindow",
+                store: UserDefaults(suiteName: "group.JackKroll.recall")) private var weakRecallWindow: Int = 25
 
     private struct RowItem: Identifiable {
         let id = UUID()

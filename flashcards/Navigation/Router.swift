@@ -6,7 +6,10 @@ import SwiftData
 final class Router: ObservableObject {
     @Published var path: [Route] = []
 
-    func push(_ route: Route) { path.append(route) }
+    func push(_ route: Route, allowSelfPush: Bool = false) {
+        if path.last == route && !allowSelfPush { return }
+        path.append(route)
+    }
     func pop() { _ = path.popLast() }
     func popToRoot() { path.removeAll() }
     func replaceStack(with routes: [Route]) { path = routes }
