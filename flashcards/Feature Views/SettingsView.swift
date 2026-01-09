@@ -78,7 +78,7 @@ struct SettingsView: View {
                              - All associated stats 
                              """)
                     }
-                    
+                    /*
                     Button(role: .destructive) {
                         deleteAllStatsAlertIsPresented = true
                     } label: {
@@ -117,8 +117,9 @@ struct SettingsView: View {
                              For pro users, the removal of all stats will result in the data pages being blank until more stats are collected.
                              """)
                     }
+                     */
                 }
-                
+                /*
                 Section("Developer") {
                     
                     Button("Add Demo Sets") {
@@ -138,7 +139,7 @@ struct SettingsView: View {
                         WidgetCenter.shared.reloadTimelines(ofKind: "StreakWidget")
                     }
                 }
-                 
+                 */
                 
             }
 

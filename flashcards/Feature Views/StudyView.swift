@@ -262,9 +262,20 @@ struct StudyView: View {
                         Label("Undo", systemImage: visibleCards.isEmpty ? "arrow.trianglehead.2.clockwise.rotate.90" : "arrow.uturn.left")
                     }
                     .disabled(undoStack.isEmpty)
-                    Spacer()
-                    
                 }
+                ToolbarSpacer(.flexible, placement: .bottomBar)
+                ToolbarItem(placement: .bottomBar) {
+                    HStack(spacing: 0){
+                        Text("SWIPE LEFT/RIGHT TO SORT")
+                            .fontWeight(.semibold)
+                            .font(.caption)
+                            .fontDesign(.monospaced)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .sharedBackgroundVisibility(.hidden)
+                ToolbarSpacer(.flexible, placement: .bottomBar)
                 ToolbarItem(placement: .bottomBar){
                     if entitlement.hasPro {
                         Button {
