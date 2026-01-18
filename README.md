@@ -60,3 +60,13 @@ Fun Fact: Sheets have their own dedicated NavigationStack that is entirely seper
 
 **What could I have done to prevent this?**
 Mainly just plan ahead my navigation flow a bit better and understand where I would need deeper management on navigation
+
+---
+## AI Disclaimer!
+This was also the first project I explored the usage of AI with my workflow. At times I was both amazed, and also incredibly disapointed. Often the only proposals I ended up using required a high reasoning level. I found the output often unreasonably complex and stuff that would be a nightmare to dig through and integrate with my system (even though it had full context!). Further, this was only using the built in Xcode integration, no agent was utilized at any point.
+
+I found that it was extremely good at creating skeletons for UI that I could then customize, modernize, and tie in properly. This was mainly where it was used (using it for any logic was simply not well done, and I argue is a dangerous path). 
+
+Further, I have found it incredibly useful is the development of front facing App Store content. Especially since it can draw from the context of your project and create a proper description and sales pitch for you. Historically my descriptions were horrible, and I feel far more confident with what it has created (which I did need to modify for accuracy, but close enough!)
+
+Overall: I found it useful to speed up some UI workflows, but I feel it could be a slippery slope with the main app logic. 
